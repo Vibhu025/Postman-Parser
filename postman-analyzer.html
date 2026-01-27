@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -394,6 +395,30 @@
         }
 
         /* Endpoints List */
+
+        /* New style for the plain-text report look */
+.report-container {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    font-family: 'Space Mono', 'Courier New', monospace; /* Using mono for the report feel */
+    color: #1e293b;
+    line-height: 1.4;
+    border: 1px solid var(--border-color);
+}
+
+.report-section-title {
+    font-weight: bold;
+    text-decoration: underline;
+    margin-top: 1.5rem;
+    display: block;
+}
+
+.report-line {
+    display: block;
+    white-space: pre-wrap;
+    margin: 0.2rem 0;
+}
         .endpoints-container {
             background: var(--bg-card);
             border-radius: 16px;
@@ -654,6 +679,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -738,7 +764,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="method-filters" id="methodFilters">
                     <button class="method-filter get active" data-method="GET">GET</button>
                     <button class="method-filter post active" data-method="POST">POST</button>
@@ -1184,95 +1210,84 @@
         }
 
         // Render Endpoints
-        function renderEndpoints() {
-            const container = document.getElementById('endpointsList');
-            
-            if (AppState.filteredEndpoints.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🔍</div>
-                        <p>No endpoints found matching your filters.</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            
-            if (AppState.onePerLine) {
-                // ONE METHOD PER LINE: Show each endpoint separately (each method gets its own row)
-                html = AppState.filteredEndpoints.map(endpoint => `
-                    <div class="endpoint-item">
-                        <div class="endpoint-header" onclick="toggleEndpoint(this)">
-                            <span class="method-badge ${endpoint.method.toLowerCase()}">${endpoint.method}</span>
-                            <span class="endpoint-path">${endpoint.normalizedUrl}</span>
-                            <span class="endpoint-name">${endpoint.name}</span>
-                            <span class="expand-icon">▼</span>
-                        </div>
-                        <div class="endpoint-details">
-                            <div class="endpoint-details-content">
-                                <div class="detail-row">
-                                    <div class="detail-label">Original URL:</div>
-                                    <div class="detail-value">${endpoint.originalUrl}</div>
-                                </div>
-                                <div class="detail-row">
-                                    <div class="detail-label">Collection:</div>
-                                    <div class="detail-value">${endpoint.collection}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                // GROUPED VIEW: Group endpoints by normalized URL, show all methods together
-                const grouped = {};
-                AppState.filteredEndpoints.forEach(endpoint => {
-                    const key = endpoint.normalizedUrl;
-                    if (!grouped[key]) {
-                        grouped[key] = {
-                            normalizedUrl: endpoint.normalizedUrl,
-                            methods: []
-                        };
-                    }
-                    grouped[key].methods.push(endpoint);
-                });
-                
-                html = Object.values(grouped).map(group => {
-                    const methodBadges = group.methods.map(ep => 
-                        `<span class="method-badge ${ep.method.toLowerCase()}">${ep.method}</span>`
-                    ).join(' ');
-                    
-                    const names = [...new Set(group.methods.map(ep => ep.name))].join(', ');
-                    
-                    const detailsRows = group.methods.map(ep => `
-                        <div class="detail-row">
-                            <div class="detail-label">[${ep.method}] ${ep.name}:</div>
-                            <div class="detail-value">${ep.originalUrl}</div>
-                            <div style="font-size: 0.75rem; color: var(--accent-cyan); margin-top: 0.25rem; font-style: italic;">📦 ${ep.collection}</div>
-                        </div>
-                    `).join('');
-                    
-                    return `
-                        <div class="endpoint-item">
-                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
-                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">${methodBadges}</div>
-                                <span class="endpoint-path">${group.normalizedUrl}</span>
-                                <span class="endpoint-name">${names}</span>
-                                <span class="expand-icon">▼</span>
-                            </div>
-                            <div class="endpoint-details">
-                                <div class="endpoint-details-content">
-                                    ${detailsRows}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-            
-            container.innerHTML = html;
+       function renderEndpoints() {
+    const container = document.getElementById('endpointsList');
+    
+    if (AppState.filteredEndpoints.length === 0) {
+        container.innerHTML = `<div class="empty-state"><p>No endpoints found matching filters.</p></div>`;
+        return;
+    }
+
+    // 1. Group data by Host
+    const hostGroups = {};
+
+    AppState.filteredEndpoints.forEach(ep => {
+        let host = "Unknown Host";
+        let displayPath = ep.normalizedUrl;
+
+        try {
+            const url = new URL(ep.originalUrl.includes('://') ? ep.originalUrl : 'http://' + ep.originalUrl);
+            host = `${url.protocol}//${url.host}`;
+            displayPath = url.pathname + url.search;
+        } catch(e) {
+            host = "Unresolved/Variable Hosts";
+            displayPath = ep.normalizedUrl;
         }
 
+        if (!hostGroups[host]) hostGroups[host] = [];
+        hostGroups[host].push(ep);
+    });
+
+    // 2. Generate the HTML Output
+    let html = `<div class="report-container">`;
+
+    Object.keys(hostGroups).sort().forEach(host => {
+        html += `<span class="report-section-title">Target Host</span>`;
+        html += `<span class="report-line">-----------------</span>`;
+        html += `<span class="report-line"><strong>${SecurityUtils.escapeHtml(host)}</strong></span><br>`;
+
+        html += `<span class="report-section-title">Endpoints in Scope</span>`;
+        html += `<span class="report-line">------------------------</span>`;
+        
+        const endpointsInHost = hostGroups[host];
+
+        if (AppState.onePerLine) {
+            // MODE: One method per line
+            endpointsInHost.sort((a, b) => a.normalizedUrl.localeCompare(b.normalizedUrl)).forEach(ep => {
+                let pathOnly = ep.normalizedUrl;
+                try {
+                    const u = new URL(ep.originalUrl.includes('://') ? ep.originalUrl : 'http://' + ep.originalUrl);
+                    pathOnly = u.pathname + u.search;
+                } catch(e) {}
+                
+                html += `<span class="report-line">[${ep.method}] ${SecurityUtils.escapeHtml(pathOnly)}</span>`;
+            });
+        } else {
+            // MODE: Grouped methods (e.g., [GET,POST])
+            const pathGroup = {};
+            endpointsInHost.forEach(ep => {
+                let pathOnly = ep.normalizedUrl;
+                try {
+                    const u = new URL(ep.originalUrl.includes('://') ? ep.originalUrl : 'http://' + ep.originalUrl);
+                    pathOnly = u.pathname + u.search;
+                } catch(e) {}
+                
+                if (!pathGroup[pathOnly]) pathGroup[pathOnly] = new Set();
+                pathGroup[pathOnly].add(ep.method);
+            });
+
+            Object.keys(pathGroup).sort().forEach(path => {
+                const methods = Array.from(pathGroup[path]).join(',');
+                html += `<span class="report-line">[${methods}] ${SecurityUtils.escapeHtml(path)}</span>`;
+            });
+        }
+
+        html += `<br><br>`; 
+    });
+
+    html += `</div>`;
+    container.innerHTML = html;
+}
         // Toggle Endpoint Accordion
         function toggleEndpoint(header) {
             const item = header.parentElement;
@@ -1384,4 +1399,5 @@
         document.addEventListener('drop', (e) => e.preventDefault());
     </script>
 </body>
+
 </html>
