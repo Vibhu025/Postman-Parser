@@ -38,6 +38,3 @@ A professional, high-performance, single-file HTML application designed to audit
 ## 📝 License
 
 Distributed under the MIT License.
-
----
-*Note: To host this as a live tool on GitHub, rename your file to `index.html` and enable **GitHub Pages** in your repository settings.*****
