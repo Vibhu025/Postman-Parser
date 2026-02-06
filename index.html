@@ -5,11 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:;">
-    <a href="https://github.com/Vibhu025/Postman-Parser" target="_blank" class="github-link" title="View source on GitHub">
-    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-    <span>GitHub</span>
-</a>
-    <title>Postman Collection Analyzer</title>
+    <title>Postman Collection Analyzer - Enhanced</title>
     <style>
         @import url('data:text/css;base64,QGZvbnQtZmFjZSB7IGZvbnQtZmFtaWx5OiAnU3BhY2UgTW9ubyc7IHNyYzogbG9jYWwoJ1NwYWNlIE1vbm8nKSwgbG9jYWwoJ01lbmxvJyksIGxvY2FsKCdDb3VyaWVyIE5ldycpLCBtb25vc3BhY2U7IH0=');
         
@@ -38,37 +34,6 @@
             --method-delete: #ef4444;
             --method-other: #8b5cf6;
         }
-        .github-link {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    text-decoration: none;
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 0.85rem;
-    padding: 0.5rem 0.8rem;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    z-index: 100;
-}
-
-.github-link:hover {
-    color: var(--accent-cyan);
-    border-color: var(--accent-cyan);
-    background: var(--bg-card);
-    transform: translateY(-2px);
-}
-
-@media (max-width: 640px) {
-    .github-link span {
-        display: none; /* Hide text on small screens to save space */
-    }
-}
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -113,7 +78,6 @@
             font-weight: 400;
         }
 
-        /* Upload Section */
         .upload-section {
             background: var(--bg-card);
             border-radius: 16px;
@@ -186,10 +150,6 @@
             font-size: 0.8rem;
         }
 
-        .file-tag-icon {
-            font-size: 1rem;
-        }
-
         .btn {
             padding: 0.875rem 2rem;
             border: none;
@@ -223,7 +183,7 @@
             background: var(--bg-card);
         }
 
-        .warning-message {
+        .warning-message, .info-message {
             background: rgba(251, 191, 36, 0.1);
             border-left: 4px solid #fbbf24;
             padding: 1rem;
@@ -233,7 +193,22 @@
             color: #fbbf24;
         }
 
-        /* Dashboard Stats */
+        .info-message {
+            background: rgba(59, 130, 246, 0.1);
+            border-left-color: #3b82f6;
+            color: #60a5fa;
+        }
+
+        .success-message {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #22c55e;
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -269,6 +244,10 @@
             background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
         }
 
+        .stat-card:nth-child(4)::before {
+            background: linear-gradient(90deg, #22c55e, var(--accent-cyan));
+        }
+
         .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -290,7 +269,6 @@
             line-height: 1;
         }
 
-        /* Controls */
         .controls-panel {
             background: var(--bg-card);
             border-radius: 16px;
@@ -338,7 +316,6 @@
             box-shadow: 0 0 0 3px rgba(77, 159, 255, 0.1);
         }
 
-        /* Method Filters */
         .method-filters {
             display: flex;
             flex-wrap: wrap;
@@ -376,7 +353,6 @@
         .method-filter.delete { color: var(--method-delete); }
         .method-filter.other { color: var(--method-other); }
 
-        /* Toggle Switch */
         .toggle-wrapper {
             display: flex;
             align-items: center;
@@ -429,31 +405,29 @@
             transform: translateX(24px);
         }
 
-        /* Endpoints List */
+        .report-container {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            font-family: 'Space Mono', 'Courier New', monospace;
+            color: #1e293b;
+            line-height: 1.4;
+            border: 1px solid var(--border-color);
+        }
 
-        /* New style for the plain-text report look */
-.report-container {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    font-family: 'Space Mono', 'Courier New', monospace; /* Using mono for the report feel */
-    color: #1e293b;
-    line-height: 1.4;
-    border: 1px solid var(--border-color);
-}
+        .report-section-title {
+            font-weight: bold;
+            text-decoration: underline;
+            margin-top: 1.5rem;
+            display: block;
+        }
 
-.report-section-title {
-    font-weight: bold;
-    text-decoration: underline;
-    margin-top: 1.5rem;
-    display: block;
-}
+        .report-line {
+            display: block;
+            white-space: pre-wrap;
+            margin: 0.2rem 0;
+        }
 
-.report-line {
-    display: block;
-    white-space: pre-wrap;
-    margin: 0.2rem 0;
-}
         .endpoints-container {
             background: var(--bg-card);
             border-radius: 16px;
@@ -461,112 +435,6 @@
             border: 1px solid var(--border-color);
         }
 
-        .endpoint-item {
-            background: white;
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
-        }
-
-        .endpoint-item:hover {
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            transform: translateX(4px);
-        }
-
-        .endpoint-header {
-            padding: 1.25rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            user-select: none;
-            position: relative;
-        }
-
-        .method-badge {
-            padding: 0.4rem 0.85rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: white;
-            min-width: 70px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .method-badge.get { background: var(--method-get); }
-        .method-badge.post { background: var(--method-post); }
-        .method-badge.put { background: var(--method-put); }
-        .method-badge.patch { background: var(--method-patch); }
-        .method-badge.delete { background: var(--method-delete); }
-        .method-badge.options,
-        .method-badge.head { background: var(--method-other); }
-
-        .endpoint-path {
-            flex: 1;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            color: #0f172a;
-            font-weight: 500;
-        }
-
-        .endpoint-name {
-            color: #64748b;
-            font-size: 0.85rem;
-            margin-right: auto;
-        }
-
-        .expand-icon {
-            transition: transform 0.3s ease;
-            color: #94a3b8;
-            font-size: 1.2rem;
-        }
-
-        .endpoint-item.expanded .expand-icon {
-            transform: rotate(180deg);
-        }
-
-        .endpoint-details {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .endpoint-item.expanded .endpoint-details {
-            max-height: 500px;
-        }
-
-        .endpoint-details-content {
-            padding: 1.25rem;
-            background: #f8fafc;
-        }
-
-        .detail-row {
-            margin-bottom: 0.75rem;
-            font-size: 0.9rem;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            color: #475569;
-            margin-bottom: 0.25rem;
-        }
-
-        .detail-value {
-            font-family: 'Courier New', monospace;
-            color: #0f172a;
-            background: white;
-            padding: 0.5rem;
-            border-radius: 6px;
-            word-break: break-all;
-        }
-
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
@@ -579,7 +447,6 @@
             opacity: 0.3;
         }
 
-        /* Utility Classes */
         .hidden {
             display: none;
         }
@@ -592,68 +459,12 @@
             flex-wrap: wrap;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .upload-area {
-                grid-template-columns: 1fr;
-            }
-
-            .controls-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .method-filters {
-                justify-content: center;
-            }
-
-            .endpoint-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.75rem;
-            }
-
-            .stat-value {
-                font-size: 2rem;
-            }
-        }
-
-        /* Loading Animation */
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .loading {
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        /* Success Message */
-        .success-message {
-            background: rgba(34, 197, 94, 0.1);
-            border-left: 4px solid #22c55e;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #22c55e;
-        }
-
-        /* Export Section */
         .export-section {
             margin-top: 1rem;
             padding-top: 1rem;
             border-top: 1px solid var(--border-color);
         }
 
-        /* All Endpoints List */
         .all-endpoints-list {
             display: flex;
             flex-direction: column;
@@ -676,12 +487,27 @@
             border-left-color: var(--accent-blue);
         }
 
-        .all-endpoint-row .method-badge {
+        .method-badge {
+            padding: 0.4rem 0.85rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: white;
+            min-width: 70px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             flex-shrink: 0;
-            min-width: 65px;
-            font-size: 0.7rem;
-            padding: 0.35rem 0.7rem;
         }
+
+        .method-badge.get { background: var(--method-get); }
+        .method-badge.post { background: var(--method-post); }
+        .method-badge.put { background: var(--method-put); }
+        .method-badge.patch { background: var(--method-patch); }
+        .method-badge.delete { background: var(--method-delete); }
+        .method-badge.options,
+        .method-badge.head { background: var(--method-other); }
 
         .all-endpoint-info {
             flex: 1;
@@ -712,6 +538,57 @@
         .accordion-header h3 {
             color: var(--text-primary);
         }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-secondary);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .upload-area {
+                grid-template-columns: 1fr;
+            }
+
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .method-filters {
+                justify-content: center;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
     </style>
 </head>
 
@@ -719,7 +596,7 @@
     <div class="container">
         <header>
             <h1>⚡ Postman Collection Analyzer</h1>
-            <p class="subtitle">Parse, normalize, and analyze your API collections with advanced filtering</p>
+            <p class="subtitle">Parse, normalize, and deduplicate your API collections with advanced filtering</p>
         </header>
 
         <!-- Upload Section -->
@@ -748,6 +625,11 @@
                 <button class="btn" id="parseBtn">Parse Collections</button>
                 <button class="btn btn-secondary" id="clearBtn">Clear All</button>
             </div>
+            <div id="progressContainer" class="hidden">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
             <div id="warningContainer"></div>
         </div>
 
@@ -765,6 +647,10 @@
                 <div class="stat-card">
                     <div class="stat-label">Total Requests</div>
                     <div class="stat-value" id="totalRequests">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Duplicates Removed</div>
+                    <div class="stat-value" id="duplicatesRemoved">0</div>
                 </div>
             </div>
         </div>
@@ -828,12 +714,12 @@
                 <div class="accordion-header" onclick="toggleAllEndpointsAccordion()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem;">📋 All Endpoints - Original URLs</h3>
-                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Click to expand/collapse all endpoints with their original URLs</p>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Click to expand/collapse all unique endpoints with their original URLs</p>
                     </div>
                     <span class="expand-icon" id="allEndpointsExpandIcon" style="font-size: 1.5rem; transition: transform 0.3s ease;">▼</span>
                 </div>
                 <div id="allEndpointsContent" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease;">
-                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
+                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); max-height: 600px; overflow-y: auto;">
                         <div id="allEndpointsList"></div>
                     </div>
                 </div>
@@ -842,6 +728,60 @@
     </div>
 
     <script>
+        // Constants
+        const MAX_FILE_SIZE = 31457280; // 30MB
+        const MAX_VARIABLE_ITERATIONS = 15;
+        const SEARCH_DEBOUNCE_MS = 300;
+
+        // Security: XSS Prevention Utilities
+        const SecurityUtils = {
+            escapeHtml: (text) => {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            },
+            
+            // Minimal escaping for display - only escapes < > to prevent tag injection
+            // Preserves &, {, }, and other URL-safe characters
+            escapeForDisplay: (text) => {
+                if (typeof text !== 'string') return text;
+                return text
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+            },
+            
+            sanitizeJSON: (obj) => {
+                if (typeof obj === 'string') {
+                    return SecurityUtils.escapeHtml(obj);
+                }
+                if (Array.isArray(obj)) {
+                    return obj.map(item => SecurityUtils.sanitizeJSON(item));
+                }
+                if (obj && typeof obj === 'object') {
+                    const sanitized = {};
+                    for (const [key, value] of Object.entries(obj)) {
+                        sanitized[SecurityUtils.escapeHtml(key)] = SecurityUtils.sanitizeJSON(value);
+                    }
+                    return sanitized;
+                }
+                return obj;
+            }
+        };
+
+        // Application State
+        const AppState = {
+            collections: [],
+            environments: {},
+            allEndpoints: [], // All parsed endpoints with duplicates
+            uniqueEndpoints: [], // Deduplicated endpoints
+            filteredEndpoints: [],
+            activeMethodFilters: new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD']),
+            searchTerm: '',
+            sortBy: 'path-asc',
+            onePerLine: false,
+            duplicateCount: 0
+        };
+
         // Display selected files
         function displaySelectedFiles(inputId, indicatorId) {
             const input = document.getElementById(inputId);
@@ -867,89 +807,64 @@
             indicator.innerHTML = tags;
         }
 
-        // Security: XSS Prevention Utilities
-        const SecurityUtils = {
-            escapeHtml: (text) => {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            },
-            
-            sanitizeJSON: (obj) => {
-                if (typeof obj === 'string') {
-                    return SecurityUtils.escapeHtml(obj);
-                }
-                if (Array.isArray(obj)) {
-                    return obj.map(item => SecurityUtils.sanitizeJSON(item));
-                }
-                if (obj && typeof obj === 'object') {
-                    const sanitized = {};
-                    for (const [key, value] of Object.entries(obj)) {
-                        sanitized[SecurityUtils.escapeHtml(key)] = SecurityUtils.sanitizeJSON(value);
-                    }
-                    return sanitized;
-                }
-                return obj;
-            }
-        };
-
-        // Application State
-        const AppState = {
-            collections: [],
-            environments: {},
-            parsedEndpoints: [],
-            filteredEndpoints: [],
-            activeMethodFilters: new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD']),
-            searchTerm: '',
-            sortBy: 'path-asc',
-            onePerLine: false
-        };
-
-        // File size validation (30MB = 31457280 bytes)
-        const MAX_FILE_SIZE = 31457280;
-
-        // Variable Resolution (10 nested iterations)
-        function resolveVariables(str, variables, maxIterations = 10) {
+        // Variable Resolution with improved iteration
+        function resolveVariables(str, variables, maxIterations = MAX_VARIABLE_ITERATIONS) {
             if (typeof str !== 'string') return str;
             
             let resolved = str;
             let iteration = 0;
+            let hasChanges = true;
             
-            while (iteration < maxIterations) {
+            while (iteration < maxIterations && hasChanges) {
                 const before = resolved;
                 resolved = resolved.replace(/\{\{([^}]+)\}\}/g, (match, varName) => {
                     const trimmedName = varName.trim();
                     return variables[trimmedName] !== undefined ? variables[trimmedName] : match;
                 });
                 
-                if (resolved === before) break;
+                hasChanges = (resolved !== before);
                 iteration++;
             }
             
             return resolved;
         }
 
-        // URL Normalization
+        // Improved URL Normalization - DOES NOT encode { } braces
         function normalizeUrl(url) {
             if (!url) return '';
             
-            // Preserve v1, v2, v3, etc. version numbers
             let normalized = url;
             
-            // Convert UUIDs to {uuid}
+            // Step 1: Convert UUIDs to {uuid}
             normalized = normalized.replace(
                 /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
                 '{uuid}'
             );
             
-            // Convert numeric IDs to {id} but preserve version numbers
+            // Step 2: Convert numeric IDs to {id}, but preserve version numbers like v1, v2, v3
+            // This regex looks for numbers that are NOT preceded by 'v' and are path segments
             normalized = normalized.replace(
-                /\/(?!v\d+\b)(\d+)(?=\/|$)/g,
-                '/{id}'
+                /\/(\d+)(?=\/|$|\?|#)/g,
+                (match, number, offset, string) => {
+                    // Check if this number is preceded by 'v' (case insensitive)
+                    const beforeMatch = string.substring(Math.max(0, offset - 2), offset);
+                    if (/v$/i.test(beforeMatch)) {
+                        return match; // Keep version numbers as-is
+                    }
+                    return '/{id}';
+                }
             );
             
-            // Preserve camelCase and hyphenated names longer than 12 characters
-            // This regex preserves meaningful path segments
+            // Step 3: Normalize query parameters that look like IDs
+            normalized = normalized.replace(
+                /([?&][\w-]+)=([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/gi,
+                '$1={uuid}'
+            );
+            
+            normalized = normalized.replace(
+                /([?&][\w-]+)=(\d+)/g,
+                '$1={id}'
+            );
             
             return normalized;
         }
@@ -976,10 +891,13 @@
                     } else if (request.url && request.url.raw) {
                         url = request.url.raw;
                     } else if (request.url && Array.isArray(request.url.path)) {
-                        url = '/' + request.url.path.join('/');
+                        const protocol = request.url.protocol || 'http';
+                        const host = Array.isArray(request.url.host) ? request.url.host.join('.') : (request.url.host || '');
+                        const path = request.url.path.join('/');
+                        url = `${protocol}://${host}/${path}`;
                     }
                     
-                    // Resolve variables
+                    // Resolve variables BEFORE normalization
                     url = resolveVariables(url, variables);
                     
                     // Normalize URL
@@ -989,13 +907,46 @@
                         name: SecurityUtils.escapeHtml(item.name || 'Unnamed Request'),
                         method: method,
                         originalUrl: SecurityUtils.escapeHtml(url),
-                        normalizedUrl: SecurityUtils.escapeHtml(normalizedUrl),
-                        collection: SecurityUtils.escapeHtml(collectionName)
+                        normalizedUrl: normalizedUrl, // Don't escape - used for grouping/comparison
+                        collection: SecurityUtils.escapeHtml(collectionName),
+                        // Create a unique key for deduplication
+                        uniqueKey: `${method}:::${normalizedUrl}`
                     });
                 }
             }
             
             return endpoints;
+        }
+
+        // Deduplicate endpoints based on method + normalized URL
+        function deduplicateEndpoints(endpoints) {
+            const seen = new Map();
+            const unique = [];
+            
+            for (const endpoint of endpoints) {
+                const key = endpoint.uniqueKey;
+                if (!seen.has(key)) {
+                    seen.set(key, endpoint);
+                    unique.push(endpoint);
+                }
+            }
+            
+            const duplicateCount = endpoints.length - unique.length;
+            return { unique, duplicateCount };
+        }
+
+        // Update progress bar
+        function updateProgress(percent) {
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            
+            if (percent > 0 && percent < 100) {
+                progressContainer.classList.remove('hidden');
+                progressFill.style.width = percent + '%';
+            } else {
+                progressContainer.classList.add('hidden');
+                progressFill.style.width = '0%';
+            }
         }
 
         // Parse Collections
@@ -1005,6 +956,7 @@
             const warningContainer = document.getElementById('warningContainer');
             
             warningContainer.innerHTML = '';
+            updateProgress(0);
             
             if (!collectionInput.files.length) {
                 warningContainer.innerHTML = '<div class="warning-message">⚠️ Please select at least one collection file.</div>';
@@ -1021,10 +973,13 @@
                     warningContainer.innerHTML = `<div class="warning-message">⚠️ Warning: The following files exceed 30MB: ${SecurityUtils.escapeHtml(fileNames)}. Processing may be slow.</div>`;
                 }
                 
+                updateProgress(10);
+                
                 // Parse environment files
                 const variables = {};
                 
-                for (const file of environmentInput.files) {
+                for (let i = 0; i < environmentInput.files.length; i++) {
+                    const file = environmentInput.files[i];
                     try {
                         let content = await file.text();
                         
@@ -1037,7 +992,7 @@
                         
                         if (openBraces > closeBraces) {
                             content += '\n}';
-                            warningContainer.innerHTML += `<div class="warning-message">⚠️ Auto-fixed "${SecurityUtils.escapeHtml(file.name)}" - added missing closing brace</div>`;
+                            warningContainer.innerHTML += `<div class="info-message">ℹ️ Auto-fixed "${SecurityUtils.escapeHtml(file.name)}" - added missing closing brace</div>`;
                         }
                         
                         const env = JSON.parse(content);
@@ -1050,19 +1005,26 @@
                             });
                         }
                     } catch (envError) {
-                        warningContainer.innerHTML += `<div class="warning-message">⚠️ Skipping environment file "${SecurityUtils.escapeHtml(file.name)}": ${SecurityUtils.escapeHtml(envError.message)}. Collections will be parsed without environment variables.</div>`;
+                        warningContainer.innerHTML += `<div class="warning-message">⚠️ Skipping environment file "${SecurityUtils.escapeHtml(file.name)}": ${SecurityUtils.escapeHtml(envError.message)}</div>`;
                         console.error(`Environment file error (${file.name}):`, envError);
                     }
                 }
                 
                 AppState.environments = variables;
                 
+                updateProgress(30);
+                
                 // Parse collection files
                 const allEndpoints = [];
                 let successCount = 0;
                 let failCount = 0;
+                const totalFiles = collectionInput.files.length;
                 
-                for (const file of collectionInput.files) {
+                for (let i = 0; i < totalFiles; i++) {
+                    const file = collectionInput.files[i];
+                    const fileProgress = 30 + ((i / totalFiles) * 50);
+                    updateProgress(fileProgress);
+                    
                     try {
                         const content = await file.text();
                         
@@ -1071,7 +1033,7 @@
                         try {
                             collection = JSON.parse(content);
                         } catch (jsonError) {
-                            throw new Error(`Invalid JSON in file "${file.name}": ${jsonError.message}`);
+                            throw new Error(`Invalid JSON: ${jsonError.message}`);
                         }
                         
                         const collectionName = collection.info?.name || file.name;
@@ -1088,10 +1050,19 @@
                     }
                 }
                 
-                AppState.parsedEndpoints = allEndpoints;
-                AppState.filteredEndpoints = allEndpoints;
+                updateProgress(80);
                 
-                if (allEndpoints.length > 0) {
+                // Deduplicate endpoints
+                const { unique, duplicateCount } = deduplicateEndpoints(allEndpoints);
+                
+                AppState.allEndpoints = allEndpoints;
+                AppState.uniqueEndpoints = unique;
+                AppState.filteredEndpoints = unique;
+                AppState.duplicateCount = duplicateCount;
+                
+                updateProgress(90);
+                
+                if (unique.length > 0) {
                     updateStats();
                     applyFiltersAndSort();
                     renderEndpoints();
@@ -1104,27 +1075,29 @@
                     document.getElementById('endpointsSection').classList.remove('hidden');
                 }
                 
+                updateProgress(100);
+                
                 // Show results summary
                 if (successCount > 0) {
-                    warningContainer.innerHTML += `<div class="success-message">✅ Successfully parsed ${successCount} collection file(s) with ${allEndpoints.length} endpoints!</div>`;
+                    let message = `✅ Successfully parsed ${successCount} collection file(s) with ${allEndpoints.length} total endpoints!`;
+                    if (duplicateCount > 0) {
+                        message += ` Removed ${duplicateCount} duplicate(s), ${unique.length} unique endpoints remain.`;
+                    }
+                    warningContainer.innerHTML += `<div class="success-message">${message}</div>`;
                 }
                 
                 if (failCount > 0 && successCount === 0) {
                     warningContainer.innerHTML += `<div class="warning-message">❌ Failed to parse all ${failCount} file(s). Please check the errors above.</div>`;
                 }
                 
+                // Hide progress after a short delay
+                setTimeout(() => updateProgress(0), 1000);
+                
             } catch (error) {
-                let errorMsg = error.message;
-                let fileName = 'Unknown file';
-                
-                // Try to identify which file caused the error
-                if (error.fileName) {
-                    fileName = error.fileName;
-                }
-                
+                updateProgress(0);
                 warningContainer.innerHTML = `
                     <div class="warning-message">
-                        ❌ Error parsing files: ${SecurityUtils.escapeHtml(errorMsg)}
+                        ❌ Error parsing files: ${SecurityUtils.escapeHtml(error.message)}
                         <br><br>
                         <strong>Troubleshooting tips:</strong>
                         <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
@@ -1141,22 +1114,21 @@
 
         // Update Statistics
         function updateStats() {
-            const uniqueEndpoints = new Set(
-                AppState.parsedEndpoints.map(e => `${e.method}:${e.normalizedUrl}`)
-            ).size;
+            const uniqueEndpoints = AppState.uniqueEndpoints.length;
             
             const methodCounts = new Set(
-                AppState.parsedEndpoints.map(e => e.method)
+                AppState.uniqueEndpoints.map(e => e.method)
             ).size;
             
             document.getElementById('uniqueEndpoints').textContent = uniqueEndpoints;
             document.getElementById('totalMethods').textContent = methodCounts;
-            document.getElementById('totalRequests').textContent = AppState.parsedEndpoints.length;
+            document.getElementById('totalRequests').textContent = AppState.allEndpoints.length;
+            document.getElementById('duplicatesRemoved').textContent = AppState.duplicateCount;
         }
 
         // Apply Filters and Sort
         function applyFiltersAndSort() {
-            let filtered = AppState.parsedEndpoints;
+            let filtered = AppState.uniqueEndpoints;
             
             // Apply method filters
             filtered = filtered.filter(endpoint => {
@@ -1173,14 +1145,13 @@
                 filtered = filtered.filter(endpoint => 
                     endpoint.normalizedUrl.toLowerCase().includes(term) ||
                     endpoint.method.toLowerCase().includes(term) ||
-                    endpoint.name.toLowerCase().includes(term)
+                    endpoint.name.toLowerCase().includes(term) ||
+                    endpoint.originalUrl.toLowerCase().includes(term)
                 );
             }
             
             // Apply sort
             filtered.sort((a, b) => {
-                let aVal, bVal;
-                
                 switch (AppState.sortBy) {
                     case 'path-asc':
                         return a.normalizedUrl.localeCompare(b.normalizedUrl);
@@ -1206,14 +1177,14 @@
         function renderAllEndpointsList() {
             const container = document.getElementById('allEndpointsList');
             
-            if (AppState.parsedEndpoints.length === 0) {
+            if (AppState.uniqueEndpoints.length === 0) {
                 container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No endpoints to display</p>';
                 return;
             }
             
             const html = `
                 <div class="all-endpoints-list">
-                    ${AppState.parsedEndpoints.map((endpoint, index) => `
+                    ${AppState.uniqueEndpoints.map((endpoint, index) => `
                         <div class="all-endpoint-row">
                             <span class="method-badge ${endpoint.method.toLowerCase()}">${endpoint.method}</span>
                             <div class="all-endpoint-info">
@@ -1233,100 +1204,108 @@
         function toggleAllEndpointsAccordion() {
             const content = document.getElementById('allEndpointsContent');
             const icon = document.getElementById('allEndpointsExpandIcon');
-            const accordion = document.getElementById('allEndpointsAccordion');
             
             if (content.style.maxHeight === '0px' || content.style.maxHeight === '') {
-                content.style.maxHeight = '2000px';
+                content.style.maxHeight = '5000px'; // Increased to accommodate large lists
+                content.style.overflow = 'visible';
                 icon.style.transform = 'rotate(180deg)';
             } else {
                 content.style.maxHeight = '0px';
+                content.style.overflow = 'hidden';
                 icon.style.transform = 'rotate(0deg)';
             }
         }
 
-        // Render Endpoints
-       function renderEndpoints() {
-    const container = document.getElementById('endpointsList');
-    
-    if (AppState.filteredEndpoints.length === 0) {
-        container.innerHTML = `<div class="empty-state"><p>No endpoints found matching filters.</p></div>`;
-        return;
-    }
+        // Render Endpoints with Host Grouping
+        function renderEndpoints() {
+            const container = document.getElementById('endpointsList');
+            
+            if (AppState.filteredEndpoints.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <p>No endpoints found matching current filters.</p>
+                    </div>
+                `;
+                return;
+            }
 
-    // 1. Group data by Host
-    const hostGroups = {};
+            // Group data by Host
+            const hostGroups = {};
 
-    AppState.filteredEndpoints.forEach(ep => {
-        let host = "Unknown Host";
-        let displayPath = ep.normalizedUrl;
+            AppState.filteredEndpoints.forEach(ep => {
+                let host = "Unknown Host";
+                let displayPath = ep.normalizedUrl;
 
-        try {
-            const url = new URL(ep.originalUrl.includes('://') ? ep.originalUrl : 'http://' + ep.originalUrl);
-            host = `${url.protocol}//${url.host}`;
-            displayPath = url.pathname + url.search;
-        } catch(e) {
-            host = "Unresolved/Variable Hosts";
-            displayPath = ep.normalizedUrl;
-        }
-
-        if (!hostGroups[host]) hostGroups[host] = [];
-        hostGroups[host].push(ep);
-    });
-
-    // 2. Generate the HTML Output
-    let html = `<div class="report-container">`;
-
-    Object.keys(hostGroups).sort().forEach(host => {
-        html += `<span class="report-section-title">Target Host</span>`;
-        html += `<span class="report-line">-----------------</span>`;
-        html += `<span class="report-line"><strong>${SecurityUtils.escapeHtml(host)}</strong></span><br>`;
-
-        html += `<span class="report-section-title">Endpoints in Scope</span>`;
-        html += `<span class="report-line">------------------------</span>`;
-        
-        const endpointsInHost = hostGroups[host];
-
-        if (AppState.onePerLine) {
-            // MODE: One method per line
-            endpointsInHost.sort((a, b) => a.normalizedUrl.localeCompare(b.normalizedUrl)).forEach(ep => {
-                let pathOnly = ep.normalizedUrl;
                 try {
-                    const u = new URL(ep.originalUrl.includes('://') ? ep.originalUrl : 'http://' + ep.originalUrl);
-                    pathOnly = u.pathname + u.search;
-                } catch(e) {}
+                    // Handle URLs with or without protocol - use original URL for host extraction
+                    const urlToParse = ep.originalUrl.includes('://') ? ep.originalUrl : 'http://' + ep.originalUrl;
+                    const url = new URL(urlToParse);
+                    host = `${url.protocol}//${url.host}`;
+                    
+                    // Extract path from normalized URL without URL encoding
+                    // Don't use URL constructor as it will encode { and }
+                    let normalizedPath = ep.normalizedUrl;
+                    
+                    // Remove protocol and host if present
+                    normalizedPath = normalizedPath.replace(/^https?:\/\/[^\/]+/, '');
+                    
+                    // If normalizedPath is empty or doesn't start with /, try to extract from original structure
+                    if (!normalizedPath || !normalizedPath.startsWith('/')) {
+                        normalizedPath = '/' + normalizedPath;
+                    }
+                    
+                    displayPath = normalizedPath;
+                } catch(e) {
+                    // If URL parsing fails, check if it contains variables
+                    if (ep.originalUrl.includes('{{') || ep.originalUrl.includes('{')) {
+                        host = "Unresolved/Variable Hosts";
+                    }
+                    // Extract just the path portion
+                    displayPath = ep.normalizedUrl.replace(/^https?:\/\/[^\/]+/, '') || ep.normalizedUrl;
+                }
+
+                if (!hostGroups[host]) hostGroups[host] = [];
+                hostGroups[host].push({ ...ep, displayPath });
+            });
+
+            // Generate HTML Output
+            let html = `<div class="report-container">`;
+
+            Object.keys(hostGroups).sort().forEach(host => {
+                html += `<span class="report-section-title">Target Host</span>`;
+                html += `<span class="report-line">-----------------</span>`;
+                html += `<span class="report-line"><strong>${SecurityUtils.escapeHtml(host)}</strong></span><br>`;
+
+                html += `<span class="report-section-title">Endpoints in Scope</span>`;
+                html += `<span class="report-line">------------------------</span>`;
                 
-                html += `<span class="report-line">[${ep.method}] ${SecurityUtils.escapeHtml(pathOnly)}</span>`;
-            });
-        } else {
-            // MODE: Grouped methods (e.g., [GET,POST])
-            const pathGroup = {};
-            endpointsInHost.forEach(ep => {
-                let pathOnly = ep.normalizedUrl;
-                try {
-                    const u = new URL(ep.originalUrl.includes('://') ? ep.originalUrl : 'http://' + ep.originalUrl);
-                    pathOnly = u.pathname + u.search;
-                } catch(e) {}
-                
-                if (!pathGroup[pathOnly]) pathGroup[pathOnly] = new Set();
-                pathGroup[pathOnly].add(ep.method);
+                const endpointsInHost = hostGroups[host];
+
+                if (AppState.onePerLine) {
+                    // MODE: One method per line
+                    endpointsInHost.sort((a, b) => a.displayPath.localeCompare(b.displayPath)).forEach(ep => {
+                        html += `<span class="report-line">[${ep.method}] ${SecurityUtils.escapeForDisplay(ep.displayPath)}</span>`;
+                    });
+                } else {
+                    // MODE: Grouped methods (e.g., [GET,POST])
+                    const pathGroup = {};
+                    endpointsInHost.forEach(ep => {
+                        if (!pathGroup[ep.displayPath]) pathGroup[ep.displayPath] = new Set();
+                        pathGroup[ep.displayPath].add(ep.method);
+                    });
+
+                    Object.keys(pathGroup).sort().forEach(path => {
+                        const methods = Array.from(pathGroup[path]).sort().join(',');
+                        html += `<span class="report-line">[${methods}] ${SecurityUtils.escapeForDisplay(path)}</span>`;
+                    });
+                }
+
+                html += `<br><br>`; 
             });
 
-            Object.keys(pathGroup).sort().forEach(path => {
-                const methods = Array.from(pathGroup[path]).join(',');
-                html += `<span class="report-line">[${methods}] ${SecurityUtils.escapeHtml(path)}</span>`;
-            });
-        }
-
-        html += `<br><br>`; 
-    });
-
-    html += `</div>`;
-    container.innerHTML = html;
-}
-        // Toggle Endpoint Accordion
-        function toggleEndpoint(header) {
-            const item = header.parentElement;
-            item.classList.toggle('expanded');
+            html += `</div>`;
+            container.innerHTML = html;
         }
 
         // Export to TXT
@@ -1338,15 +1317,79 @@
             
             let content = 'POSTMAN COLLECTION ANALYSIS EXPORT\n';
             content += '='.repeat(50) + '\n\n';
-            content += `Total Endpoints: ${AppState.filteredEndpoints.length}\n`;
+            content += `Total Unique Endpoints: ${AppState.uniqueEndpoints.length}\n`;
+            content += `Total Requests (with duplicates): ${AppState.allEndpoints.length}\n`;
+            content += `Duplicates Removed: ${AppState.duplicateCount}\n`;
+            content += `Filtered Endpoints: ${AppState.filteredEndpoints.length}\n`;
             content += `Export Date: ${new Date().toISOString()}\n\n`;
             content += '='.repeat(50) + '\n\n';
             
-            AppState.filteredEndpoints.forEach((endpoint, index) => {
-                content += `${index + 1}. [${endpoint.method}] ${endpoint.normalizedUrl}\n`;
-                content += `   Name: ${endpoint.name}\n`;
-                content += `   Original: ${endpoint.originalUrl}\n`;
-                content += `   Collection: ${endpoint.collection}\n\n`;
+            // Group by host for export
+            const hostGroups = {};
+            
+            AppState.filteredEndpoints.forEach(ep => {
+                let host = "Unknown Host";
+                let displayPath = ep.normalizedUrl;
+
+                try {
+                    // Handle URLs with or without protocol - use original URL for host extraction
+                    const urlToParse = ep.originalUrl.includes('://') ? ep.originalUrl : 'http://' + ep.originalUrl;
+                    const url = new URL(urlToParse);
+                    host = `${url.protocol}//${url.host}`;
+                    
+                    // Extract path from normalized URL without URL encoding
+                    // Don't use URL constructor as it will encode { and }
+                    let normalizedPath = ep.normalizedUrl;
+                    
+                    // Remove protocol and host if present
+                    normalizedPath = normalizedPath.replace(/^https?:\/\/[^\/]+/, '');
+                    
+                    // If normalizedPath is empty or doesn't start with /, try to extract from original structure
+                    if (!normalizedPath || !normalizedPath.startsWith('/')) {
+                        normalizedPath = '/' + normalizedPath;
+                    }
+                    
+                    displayPath = normalizedPath;
+                } catch(e) {
+                    // If URL parsing fails, check if it contains variables
+                    if (ep.originalUrl.includes('{{') || ep.originalUrl.includes('{')) {
+                        host = "Unresolved/Variable Hosts";
+                    }
+                    // Extract just the path portion
+                    displayPath = ep.normalizedUrl.replace(/^https?:\/\/[^\/]+/, '') || ep.normalizedUrl;
+                }
+
+                if (!hostGroups[host]) hostGroups[host] = [];
+                hostGroups[host].push({ ...ep, displayPath });
+            });
+            
+            Object.keys(hostGroups).sort().forEach(host => {
+                content += `TARGET HOST\n`;
+                content += `-`.repeat(50) + '\n';
+                content += `${host}\n\n`;
+                content += `ENDPOINTS IN SCOPE\n`;
+                content += `-`.repeat(50) + '\n';
+                
+                const endpoints = hostGroups[host];
+                
+                if (AppState.onePerLine) {
+                    endpoints.sort((a, b) => a.displayPath.localeCompare(b.displayPath)).forEach(ep => {
+                        content += `[${ep.method}] ${ep.displayPath}\n`;
+                    });
+                } else {
+                    const pathGroup = {};
+                    endpoints.forEach(ep => {
+                        if (!pathGroup[ep.displayPath]) pathGroup[ep.displayPath] = new Set();
+                        pathGroup[ep.displayPath].add(ep.method);
+                    });
+                    
+                    Object.keys(pathGroup).sort().forEach(path => {
+                        const methods = Array.from(pathGroup[path]).sort().join(',');
+                        content += `[${methods}] ${path}\n`;
+                    });
+                }
+                
+                content += '\n\n';
             });
             
             const blob = new Blob([content], { type: 'text/plain' });
@@ -1358,10 +1401,22 @@
             URL.revokeObjectURL(url);
         }
 
+        // Debounce helper
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
         // Event Listeners
         document.getElementById('parseBtn').addEventListener('click', parseCollections);
         
-        // File input change listeners
         document.getElementById('collectionFiles').addEventListener('change', () => {
             displaySelectedFiles('collectionFiles', 'collectionFilesIndicator');
         });
@@ -1380,14 +1435,22 @@
             document.getElementById('controlsSection').classList.add('hidden');
             document.getElementById('allEndpointsAccordion').classList.add('hidden');
             document.getElementById('endpointsSection').classList.add('hidden');
-            AppState.parsedEndpoints = [];
+            AppState.allEndpoints = [];
+            AppState.uniqueEndpoints = [];
             AppState.filteredEndpoints = [];
+            AppState.duplicateCount = 0;
+            updateProgress(0);
         });
         
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            AppState.searchTerm = e.target.value;
+        // Debounced search
+        const debouncedSearch = debounce((value) => {
+            AppState.searchTerm = value;
             applyFiltersAndSort();
             renderEndpoints();
+        }, SEARCH_DEBOUNCE_MS);
+        
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            debouncedSearch(e.target.value);
         });
         
         document.getElementById('sortSelect').addEventListener('change', (e) => {
