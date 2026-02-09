@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:;">
-    <title>Postman Collection Analyzer - Enhanced</title>
+    <title>Security Tools Suite - Nmap & Postman Analyzer</title>
     <style>
-        @import url('data:text/css;base64,QGZvbnQtZmFjZSB7IGZvbnQtZmFtaWx5OiAnU3BhY2UgTW9ubyc7IHNyYzogbG9jYWwoJ1NwYWNlIE1vbm8nKSwgbG9jYWwoJ01lbmxvJyksIGxvY2FsKCdDb3VyaWVyIE5ldycpLCBtb25vc3BhY2U7IH0=');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         :root {
+            --primary: #667eea;
+            --primary-dark: #764ba2;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+            --light-bg: #f4f4f4;
+            --white: #ffffff;
+            --text-dark: #333;
+            --text-light: #666;
+            --border: #e0e0e0;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+            
+            /* Dark theme colors */
             --bg-primary: #0a0e27;
             --bg-secondary: #151a38;
             --bg-card: #1a2140;
@@ -33,195 +38,381 @@
             --method-patch: #ec4899;
             --method-delete: #ef4444;
             --method-other: #8b5cf6;
+            
+            --sidebar-width: 280px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(77, 159, 255, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.08) 0%, transparent 50%);
-            background-attachment: fixed;
+            overflow-x: hidden;
+            background: var(--light-bg);
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
+        /* Layout Structure */
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 3rem;
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
             padding: 2rem 0;
-            border-bottom: 1px solid var(--border-color);
-            position: relative;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
         }
 
-        h1 {
-            font-size: 2.5rem;
+        .sidebar-header {
+            padding: 0 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-logo {
+            font-size: 1.8rem;
             font-weight: 700;
             background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
         }
 
-        .subtitle {
+        .sidebar-subtitle {
+            font-size: 0.85rem;
             color: var(--text-secondary);
-            font-size: 0.95rem;
-            font-weight: 400;
         }
 
-        .upload-section {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 8px 32px var(--shadow-glow);
+        .sidebar-nav {
+            margin-top: 2rem;
+            padding: 0 1rem;
         }
 
-        .upload-area {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-        }
-
-        .file-input-wrapper label {
-            display: block;
-            padding: 1.25rem;
-            background: var(--bg-secondary);
-            border: 2px dashed var(--border-color);
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            margin: 0.5rem 0;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .file-input-wrapper label:hover {
-            border-color: var(--accent-blue);
-            background: rgba(77, 159, 255, 0.05);
-            transform: translateY(-2px);
-        }
-
-        .file-input-wrapper input[type="file"] {
-            display: none;
-        }
-
-        .file-label-text {
-            font-size: 0.9rem;
             color: var(--text-secondary);
-            display: block;
-            margin-top: 0.5rem;
+            font-weight: 500;
+            position: relative;
         }
 
-        .file-icon {
-            font-size: 2rem;
+        .nav-item:hover {
+            background: rgba(77, 159, 255, 0.1);
+            color: var(--accent-cyan);
+            transform: translateX(5px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(77, 159, 255, 0.2), rgba(168, 85, 247, 0.2));
+            color: var(--accent-cyan);
+            box-shadow: 0 4px 12px rgba(77, 159, 255, 0.2);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue));
+            border-radius: 0 4px 4px 0;
+        }
+
+        .nav-icon {
+            font-size: 1.5rem;
+        }
+
+        .nav-text {
+            flex: 1;
+        }
+
+        .nav-badge {
+            background: var(--accent-blue);
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .content-view {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .content-view.active {
             display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* Common Container */
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Common Header */
+        .app-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .app-header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 0.5rem;
         }
 
-        .selected-files {
-            margin-top: 0.75rem;
-            font-size: 0.85rem;
+        .app-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .header-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Upload Section - Common */
+        .upload-section {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .upload-section.collapsed {
+            padding: 15px 20px;
+        }
+
+        .upload-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .upload-section.collapsed .upload-header {
+            margin-bottom: 0;
+        }
+
+        .upload-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary);
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .toggle-upload {
+            padding: 6px 12px;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .toggle-upload:hover {
+            background: var(--primary-dark);
+        }
+
+        .upload-content {
+            transition: all 0.3s ease;
+        }
+
+        .upload-section.collapsed .upload-content {
+            display: none;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--primary);
+            border-radius: 8px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            text-align: center;
+        }
+
+        .upload-zone:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-color: var(--primary-dark);
+            transform: scale(1.01);
+        }
+
+        .upload-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .upload-zone h3 {
+            color: var(--primary);
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .upload-zone p {
+            color: var(--text-light);
+            font-size: 0.95em;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-list {
+            margin-top: 15px;
+        }
+
+        .file-list-compact {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
         }
 
         .file-tag {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.4rem 0.75rem;
-            background: rgba(77, 159, 255, 0.1);
-            border: 1px solid var(--accent-blue);
-            border-radius: 6px;
-            color: var(--accent-cyan);
-            margin: 0.25rem;
-            font-size: 0.8rem;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: 20px;
+            font-size: 0.85em;
         }
 
-        .btn {
-            padding: 0.875rem 2rem;
-            border: none;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            color: white;
-            box-shadow: 0 4px 16px rgba(77, 159, 255, 0.3);
+        .file-tag.nmap-file {
+            background: var(--info);
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 24px rgba(77, 159, 255, 0.4);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-secondary {
-            background: var(--bg-secondary);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-secondary:hover {
-            background: var(--bg-card);
-        }
-
-        .warning-message, .info-message {
-            background: rgba(251, 191, 36, 0.1);
-            border-left: 4px solid #fbbf24;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #fbbf24;
-        }
-
-        .info-message {
-            background: rgba(59, 130, 246, 0.1);
-            border-left-color: #3b82f6;
-            color: #60a5fa;
-        }
-
-        .success-message {
-            background: rgba(34, 197, 94, 0.1);
-            border-left: 4px solid #22c55e;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #22c55e;
-        }
-
-        .stats-grid {
+        /* Stats Cards */
+        .stats-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.75rem;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: var(--white);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px var(--shadow);
+            text-align: center;
+            transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
         }
@@ -233,89 +424,320 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
-        }
-
-        .stat-card:nth-child(2)::before {
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
-        }
-
-        .stat-card:nth-child(3)::before {
-            background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
-        }
-
-        .stat-card:nth-child(4)::before {
-            background: linear-gradient(90deg, #22c55e, var(--accent-cyan));
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
         }
 
         .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px var(--shadow-hover);
         }
 
-        .stat-label {
-            font-size: 0.85rem;
-            color: #64748b;
-            font-weight: 600;
+        .stat-card.success::before { background: var(--success); }
+        .stat-card.danger::before { background: var(--danger); }
+        .stat-card.warning::before { background: var(--warning); }
+        .stat-card.info::before { background: var(--info); }
+
+        .stat-card h3 {
+            color: var(--text-light);
+            font-size: 0.85em;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
-        .stat-value {
-            font-size: 2.5rem;
+        .stat-card .number {
+            font-size: 2.8em;
             font-weight: 700;
-            color: #0f172a;
-            line-height: 1;
+            color: var(--primary);
+            margin-bottom: 5px;
         }
 
-        .controls-panel {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid var(--border-color);
+        .stat-card.success .number { color: var(--success); }
+        .stat-card.danger .number { color: var(--danger); }
+        .stat-card.warning .number { color: var(--warning); }
+        .stat-card.info .number { color: var(--info); }
+
+        .stat-card .label {
+            color: var(--text-light);
+            font-size: 0.85em;
         }
 
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .control-group {
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: var(--white);
+        }
+
+        .btn-secondary {
+            background: var(--text-light);
+            color: var(--white);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow-hover);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Filter controls */
+        .filter-controls {
             display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow);
+            align-items: center;
         }
 
-        .control-group label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            font-size: 0.85em;
+            color: var(--text-light);
+            margin-bottom: 5px;
+            display: block;
+            font-weight: 600;
+        }
+
+        /* Table styles */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+        }
+
+        thead {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            color: var(--white);
+            padding: 15px 14px;
+            text-align: left;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
         }
 
-        input[type="text"],
-        select {
-            padding: 0.75rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            font-size: 0.95rem;
+        th.sortable {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        th.sortable:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        th.sortable::after {
+            content: '⇅';
+            margin-left: 8px;
+            opacity: 0.5;
+        }
+
+        th.sortable.asc::after {
+            content: '↑';
+            opacity: 1;
+        }
+
+        th.sortable.desc::after {
+            content: '↓';
+            opacity: 1;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        tbody tr:nth-child(even):hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+        }
+
+        td {
+            padding: 14px;
+            font-size: 0.9em;
+            color: var(--text-dark);
+        }
+
+        .state-badge {
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 0.8em;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .state-badge.open {
+            background: rgba(39, 174, 96, 0.15);
+            color: var(--success);
+            border: 2px solid var(--success);
+        }
+
+        .state-badge.closed {
+            background: rgba(231, 76, 60, 0.15);
+            color: var(--danger);
+            border: 2px solid var(--danger);
+        }
+
+        .state-badge.filtered,
+        .state-badge.open\|filtered {
+            background: rgba(243, 156, 18, 0.15);
+            color: var(--warning);
+            border: 2px solid var(--warning);
+        }
+
+        .critical-badge {
+            background: var(--danger);
+            color: var(--white);
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            margin-left: 6px;
+            font-weight: 700;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid rgba(102, 126, 234, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 40px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Content sections */
+        .content-section {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 15px var(--shadow);
+        }
+
+        .section-title {
+            margin-bottom: 20px;
+            color: var(--primary);
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        /* Select and input styles */
+        select, input[type="text"] {
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--white);
+            color: var(--text-dark);
+            font-size: 0.9em;
             transition: all 0.3s ease;
+            width: 100%;
         }
 
-        input[type="text"]:focus,
-        select:focus {
+        select:focus, input[type="text"]:focus {
             outline: none;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(77, 159, 255, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
+        /* Hidden class */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Method badges for Postman */
+        .method-badge {
+            padding: 0.4rem 0.85rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: white;
+            min-width: 70px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            display: inline-block;
+        }
+
+        .method-badge.get { background: var(--method-get); }
+        .method-badge.post { background: var(--method-post); }
+        .method-badge.put { background: var(--method-put); }
+        .method-badge.patch { background: var(--method-patch); }
+        .method-badge.delete { background: var(--method-delete); }
+        .method-badge.options,
+        .method-badge.head { background: var(--method-other); }
+
+        /* Postman specific styles */
         .method-filters {
             display: flex;
             flex-wrap: wrap;
@@ -327,8 +749,8 @@
             padding: 0.5rem 1rem;
             border-radius: 8px;
             border: 2px solid transparent;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary);
             cursor: pointer;
             font-size: 0.85rem;
             font-weight: 600;
@@ -343,15 +765,15 @@
 
         .method-filter.active {
             border-color: currentColor;
-            box-shadow: 0 4px 12px currentColor;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
-        .method-filter.get { color: var(--method-get); }
-        .method-filter.post { color: var(--method-post); }
-        .method-filter.put { color: var(--method-put); }
-        .method-filter.patch { color: var(--method-patch); }
-        .method-filter.delete { color: var(--method-delete); }
-        .method-filter.other { color: var(--method-other); }
+        .method-filter.get { color: var(--method-get); background: rgba(59, 130, 246, 0.1); }
+        .method-filter.post { color: var(--method-post); background: rgba(34, 197, 94, 0.1); }
+        .method-filter.put { color: var(--method-put); background: rgba(249, 115, 22, 0.1); }
+        .method-filter.patch { color: var(--method-patch); background: rgba(236, 72, 153, 0.1); }
+        .method-filter.delete { color: var(--method-delete); background: rgba(239, 68, 68, 0.1); }
+        .method-filter.other { color: var(--method-other); background: rgba(139, 92, 246, 0.1); }
 
         .toggle-wrapper {
             display: flex;
@@ -378,10 +800,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: var(--bg-secondary);
+            background: var(--border);
             border-radius: 13px;
             transition: 0.3s;
-            border: 1px solid var(--border-color);
         }
 
         .toggle-slider:before {
@@ -389,16 +810,15 @@
             content: "";
             height: 18px;
             width: 18px;
-            left: 3px;
-            bottom: 3px;
+            left: 4px;
+            bottom: 4px;
             background: white;
             border-radius: 50%;
             transition: 0.3s;
         }
 
         .toggle-switch input:checked + .toggle-slider {
-            background: var(--accent-blue);
-            border-color: var(--accent-blue);
+            background: var(--primary);
         }
 
         .toggle-switch input:checked + .toggle-slider:before {
@@ -409,10 +829,10 @@
             background: white;
             border-radius: 12px;
             padding: 2rem;
-            font-family: 'Space Mono', 'Courier New', monospace;
+            font-family: 'Courier New', monospace;
             color: #1e293b;
             line-height: 1.4;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
         }
 
         .report-section-title {
@@ -428,43 +848,6 @@
             margin: 0.2rem 0;
         }
 
-        .endpoints-container {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-secondary);
-        }
-
-        .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .flex-between {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .export-section {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--border-color);
-        }
-
         .all-endpoints-list {
             display: flex;
             flex-direction: column;
@@ -476,38 +859,16 @@
             align-items: flex-start;
             gap: 1rem;
             padding: 0.75rem;
-            background: var(--bg-secondary);
+            background: rgba(102, 126, 234, 0.05);
             border-radius: 8px;
             border-left: 3px solid transparent;
             transition: all 0.2s ease;
         }
 
         .all-endpoint-row:hover {
-            background: rgba(77, 159, 255, 0.05);
-            border-left-color: var(--accent-blue);
+            background: rgba(102, 126, 234, 0.1);
+            border-left-color: var(--primary);
         }
-
-        .method-badge {
-            padding: 0.4rem 0.85rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: white;
-            min-width: 70px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            flex-shrink: 0;
-        }
-
-        .method-badge.get { background: var(--method-get); }
-        .method-badge.post { background: var(--method-post); }
-        .method-badge.put { background: var(--method-put); }
-        .method-badge.patch { background: var(--method-patch); }
-        .method-badge.delete { background: var(--method-delete); }
-        .method-badge.options,
-        .method-badge.head { background: var(--method-other); }
 
         .all-endpoint-info {
             flex: 1;
@@ -517,985 +878,1582 @@
         .all-endpoint-name {
             font-size: 0.85rem;
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--text-dark);
             margin-bottom: 0.25rem;
         }
 
         .all-endpoint-url {
             font-family: 'Courier New', monospace;
             font-size: 0.8rem;
-            color: var(--text-secondary);
+            color: var(--text-light);
             word-break: break-all;
         }
 
         .all-endpoint-collection {
             font-size: 0.75rem;
-            color: var(--accent-cyan);
+            color: var(--primary);
             margin-top: 0.25rem;
             font-style: italic;
         }
 
+        .accordion-header {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
         .accordion-header h3 {
-            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-dark);
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: var(--bg-secondary);
-            border-radius: 2px;
+        .accordion-header p {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .expand-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+            color: var(--primary);
+        }
+
+        .accordion-content {
+            max-height: 0;
             overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .accordion-content.expanded {
+            max-height: 5000px;
+        }
+
+        .warning-message, .info-message, .success-message {
+            padding: 1rem;
+            border-radius: 8px;
             margin-top: 1rem;
+            font-size: 0.9rem;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
-            transition: width 0.3s ease;
-            width: 0%;
+        .warning-message {
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 4px solid #fbbf24;
+            color: #fbbf24;
         }
 
+        .info-message {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+            color: #3b82f6;
+        }
+
+        .success-message {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 4px solid #22c55e;
+            color: #22c55e;
+        }
+
+        .upload-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+        }
+
+        .file-input-wrapper label {
+            display: block;
+            padding: 1.25rem;
+            background: rgba(102, 126, 234, 0.05);
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .file-input-wrapper label:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .file-label-text {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .selected-files {
+            margin-top: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Print styles */
+        @media print {
+            .sidebar,
+            .menu-toggle,
+            .header-actions,
+            .toggle-upload,
+            .filter-controls,
+            .btn {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+            }
+
+            .upload-section {
+                display: none !important;
+            }
+
+            body {
+                background: white;
+            }
+        }
+
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             .container {
                 padding: 1rem;
             }
 
-            h1 {
-                font-size: 2rem;
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-group {
+                width: 100%;
             }
 
             .upload-area {
                 grid-template-columns: 1fr;
             }
-
-            .controls-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .method-filters {
-                justify-content: center;
-            }
-
-            .stat-value {
-                font-size: 2rem;
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .loading {
-            animation: pulse 1.5s ease-in-out infinite;
         }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <header>
-            <h1>⚡ Postman Collection Analyzer</h1>
-            <p class="subtitle">Parse, normalize, and deduplicate your API collections with advanced filtering</p>
-        </header>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">🛡️ Security Suite</div>
+                <div class="sidebar-subtitle">Professional Analysis Tools</div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-view="nmap">
+                    <span class="nav-icon">🔒</span>
+                    <span class="nav-text">Nmap Analyzer</span>
+                    <span class="nav-badge">Network</span>
+                </div>
+                <div class="nav-item" data-view="postman">
+                    <span class="nav-icon">⚡</span>
+                    <span class="nav-text">Postman Analyzer</span>
+                    <span class="nav-badge">API</span>
+                </div>
+            </nav>
+        </aside>
 
-        <!-- Upload Section -->
-        <div class="upload-section">
-            <div class="upload-area">
-                <div class="file-input-wrapper">
-                    <label for="collectionFiles">
-                        <span class="file-icon">📁</span>
-                        <strong>Collection Files</strong>
-                        <span class="file-label-text">Click to select JSON files</span>
-                    </label>
-                    <input type="file" id="collectionFiles" accept=".json" multiple>
-                    <div id="collectionFilesIndicator" class="selected-files"></div>
-                </div>
-                <div class="file-input-wrapper">
-                    <label for="environmentFiles">
-                        <span class="file-icon">🌍</span>
-                        <strong>Environment Files</strong>
-                        <span class="file-label-text">Optional environment variables</span>
-                    </label>
-                    <input type="file" id="environmentFiles" accept=".json" multiple>
-                    <div id="environmentFilesIndicator" class="selected-files"></div>
-                </div>
-            </div>
-            <div class="flex-between">
-                <button class="btn" id="parseBtn">Parse Collections</button>
-                <button class="btn btn-secondary" id="clearBtn">Clear All</button>
-            </div>
-            <div id="progressContainer" class="hidden">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-            </div>
-            <div id="warningContainer"></div>
-        </div>
+        <!-- Sidebar Overlay for Mobile -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-        <!-- Dashboard Stats -->
-        <div id="statsSection" class="hidden">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label">Unique Endpoints</div>
-                    <div class="stat-value" id="uniqueEndpoints">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Total Methods</div>
-                    <div class="stat-value" id="totalMethods">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Total Requests</div>
-                    <div class="stat-value" id="totalRequests">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Duplicates Removed</div>
-                    <div class="stat-value" id="duplicatesRemoved">0</div>
-                </div>
-            </div>
-        </div>
+        <!-- Mobile Menu Toggle -->
+        <button class="menu-toggle" id="menuToggle">☰</button>
 
-        <!-- Controls Panel -->
-        <div id="controlsSection" class="hidden">
-            <div class="controls-panel">
-                <div class="controls-grid">
-                    <div class="control-group">
-                        <label for="searchInput">🔍 Search</label>
-                        <input type="text" id="searchInput" placeholder="Filter by path, method, or name...">
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Nmap View -->
+            <div class="content-view active" id="nmapView">
+                <div class="container">
+                    <header class="app-header">
+                        <h1>🔒 Nmap Report Analyzer</h1>
+                        <p>Professional Network Security Assessment Tool</p>
+                        <div class="header-actions">
+                            <button class="header-btn" onclick="window.print()">🖨️ Print</button>
+                            <button class="header-btn" onclick="NmapAnalyzer.clear()">🔄 Reset</button>
+                        </div>
+                    </header>
+
+                    <!-- Upload Section -->
+                    <div class="upload-section" id="nmapUploadSection">
+                        <div class="upload-header">
+                            <div class="upload-title">
+                                <span>📁</span>
+                                <span>Upload Files</span>
+                            </div>
+                            <button class="toggle-upload" id="nmapToggleUpload" onclick="NmapAnalyzer.toggleUploadSection()">
+                                Collapse
+                            </button>
+                        </div>
+                        <div class="upload-content">
+                            <div class="upload-zone" id="nmapUploadZone">
+                                <div class="upload-icon">📤</div>
+                                <h3>Drop Nmap Files Here</h3>
+                                <p>Supports .xml, .nmap, and -oN output files - click to browse</p>
+                                <input type="file" id="nmapFileInput" accept=".xml,.nmap,*" multiple>
+                            </div>
+                            <div id="nmapFileList" class="file-list"></div>
+                            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                <button class="btn btn-primary" id="nmapParseBtn">Parse Files</button>
+                                <button class="btn btn-danger" id="nmapClearBtn">Clear</button>
+                            </div>
+                        </div>
+                        <div id="nmapLoadingIndicator" class="hidden">
+                            <div class="spinner"></div>
+                            <div style="text-align: center; color: var(--text-light); margin-top: 20px;">Parsing Nmap reports...</div>
+                        </div>
                     </div>
-                    <div class="control-group">
-                        <label for="sortSelect">🔄 Sort By</label>
-                        <select id="sortSelect">
-                            <option value="path-asc">Path (A → Z)</option>
-                            <option value="path-desc">Path (Z → A)</option>
-                            <option value="method-asc">Method (A → Z)</option>
-                            <option value="method-desc">Method (Z → A)</option>
-                            <option value="name-asc">Name (A → Z)</option>
-                            <option value="name-desc">Name (Z → A)</option>
-                        </select>
+
+                    <!-- Stats -->
+                    <div id="nmapStatsContainer" class="stats-container hidden"></div>
+
+                    <!-- Controls -->
+                    <div id="nmapControlsSection" class="hidden">
+                        <div class="filter-controls">
+                            <div class="filter-group">
+                                <label>Search</label>
+                                <input type="text" id="nmapSearchBox" placeholder="Filter by IP, service, port...">
+                            </div>
+                            <div class="filter-group">
+                                <label>IP Filter</label>
+                                <select id="nmapIpFilter">
+                                    <option value="all">All IP Addresses</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>State Filter</label>
+                                <select id="nmapStateFilter">
+                                    <option value="all">All States</option>
+                                    <option value="open">Open</option>
+                                    <option value="closed">Closed</option>
+                                    <option value="filtered">Filtered</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>&nbsp;</label>
+                                <button class="btn btn-success" id="nmapExportBtn">📥 Export CSV</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="control-group">
-                        <label>📋 Layout</label>
-                        <div class="toggle-wrapper">
-                            <span style="font-size: 0.85rem; color: var(--text-secondary);">One Method Per Line</span>
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="layoutToggle">
-                                <span class="toggle-slider"></span>
-                            </label>
+
+                    <!-- Table -->
+                    <div id="nmapMainContent" class="hidden">
+                        <div class="content-section">
+                            <h2 class="section-title">📋 Scan Results</h2>
+                            <div id="nmapResultsCount" style="margin-bottom: 15px; color: var(--text-light);"></div>
+                            <div class="table-container">
+                                <table id="nmapMainTable">
+                                    <thead>
+                                        <tr>
+                                            <th class="sortable" onclick="nmapSortTable(0)">IP Address</th>
+                                            <th class="sortable" onclick="nmapSortTable(1)">Hostname</th>
+                                            <th class="sortable" onclick="nmapSortTable(2)">Port</th>
+                                            <th class="sortable" onclick="nmapSortTable(3)">Protocol</th>
+                                            <th class="sortable" onclick="nmapSortTable(4)">State</th>
+                                            <th class="sortable" onclick="nmapSortTable(5)">Service</th>
+                                            <th>Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="nmapTableBody">
+                                        <tr>
+                                            <td colspan="7" style="text-align: center; padding: 50px; color: var(--text-light);">
+                                                <div style="font-size: 3em; margin-bottom: 10px; opacity: 0.3;">📊</div>
+                                                <div>Upload Nmap files to see the analysis</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="method-filters" id="methodFilters">
-                    <button class="method-filter get active" data-method="GET">GET</button>
-                    <button class="method-filter post active" data-method="POST">POST</button>
-                    <button class="method-filter put active" data-method="PUT">PUT</button>
-                    <button class="method-filter patch active" data-method="PATCH">PATCH</button>
-                    <button class="method-filter delete active" data-method="DELETE">DELETE</button>
-                    <button class="method-filter other active" data-method="OTHER">OPTIONS/HEAD</button>
-                </div>
-
-                <div class="export-section">
-                    <button class="btn btn-secondary" id="exportBtn">📥 Export to TXT</button>
-                </div>
             </div>
-        </div>
 
-        <!-- Endpoints List -->
-        <div id="endpointsSection" class="hidden">
-            <div class="endpoints-container">
-                <div id="endpointsList"></div>
-            </div>
-        </div>
+            <!-- Postman View -->
+            <div class="content-view" id="postmanView">
+                <div class="container">
+                    <header class="app-header">
+                        <h1>⚡ Postman Collection Analyzer</h1>
+                        <p>Parse, normalize, and deduplicate your API collections with advanced filtering</p>
+                        <div class="header-actions">
+                            <button class="header-btn" onclick="window.print()">🖨️ Print</button>
+                            <button class="header-btn" onclick="PostmanAnalyzer.clearAll()">🔄 Reset</button>
+                        </div>
+                    </header>
 
-        <!-- All Endpoints Accordion -->
-        <div id="allEndpointsAccordion" class="hidden">
-            <div class="controls-panel" style="margin-top: 2rem;">
-                <div class="accordion-header" onclick="toggleAllEndpointsAccordion()" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem;">📋 All Endpoints - Original URLs</h3>
-                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Click to expand/collapse all unique endpoints with their original URLs</p>
+                    <!-- Upload Section -->
+                    <div class="upload-section" id="postmanUploadSection">
+                        <div class="upload-header">
+                            <div class="upload-title">
+                                <span>📁</span>
+                                <span>Upload Files</span>
+                            </div>
+                            <button class="toggle-upload" id="postmanToggleUpload" onclick="PostmanAnalyzer.toggleUploadSection()">
+                                Collapse
+                            </button>
+                        </div>
+                        <div class="upload-content">
+                            <div class="upload-area">
+                                <div class="file-input-wrapper">
+                                    <label for="collectionFiles">
+                                        <span class="file-icon">📁</span>
+                                        <strong>Collection Files</strong>
+                                        <span class="file-label-text">Click to select JSON files</span>
+                                    </label>
+                                    <input type="file" id="collectionFiles" accept=".json" multiple>
+                                    <div id="collectionFilesIndicator" class="selected-files"></div>
+                                </div>
+                                <div class="file-input-wrapper">
+                                    <label for="environmentFiles">
+                                        <span class="file-icon">🌍</span>
+                                        <strong>Environment Files</strong>
+                                        <span class="file-label-text">Optional environment variables</span>
+                                    </label>
+                                    <input type="file" id="environmentFiles" accept=".json" multiple>
+                                    <div id="environmentFilesIndicator" class="selected-files"></div>
+                                </div>
+                            </div>
+                            <div class="flex-between">
+                                <button class="btn btn-primary" id="parseBtn">Parse Collections</button>
+                                <button class="btn btn-secondary" id="clearBtn">Clear All</button>
+                            </div>
+                            <div id="warningContainer"></div>
+                        </div>
                     </div>
-                    <span class="expand-icon" id="allEndpointsExpandIcon" style="font-size: 1.5rem; transition: transform 0.3s ease;">▼</span>
-                </div>
-                <div id="allEndpointsContent" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease;">
-                    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); max-height: 600px; overflow-y: auto;">
-                        <div id="allEndpointsList"></div>
+
+                    <!-- Dashboard Stats -->
+                    <div id="statsSection" class="hidden">
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <h3>Unique Endpoints</h3>
+                                <div class="number" id="uniqueEndpoints">0</div>
+                            </div>
+                            <div class="stat-card success">
+                                <h3>Total Methods</h3>
+                                <div class="number" id="totalMethods">0</div>
+                            </div>
+                            <div class="stat-card info">
+                                <h3>Total Requests</h3>
+                                <div class="number" id="totalRequests">0</div>
+                            </div>
+                            <div class="stat-card danger">
+                                <h3>Duplicates Removed</h3>
+                                <div class="number" id="duplicatesRemoved">0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controls Panel -->
+                    <div id="controlsSection" class="hidden">
+                        <div class="filter-controls">
+                            <div class="filter-group">
+                                <label>🔍 Search</label>
+                                <input type="text" id="searchInput" placeholder="Filter by path, method, or name...">
+                            </div>
+                            <div class="filter-group">
+                                <label>🔄 Sort By</label>
+                                <select id="sortSelect">
+                                    <option value="path-asc">Path (A → Z)</option>
+                                    <option value="path-desc">Path (Z → A)</option>
+                                    <option value="method-asc">Method (A → Z)</option>
+                                    <option value="method-desc">Method (Z → A)</option>
+                                    <option value="name-asc">Name (A → Z)</option>
+                                    <option value="name-desc">Name (Z → A)</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>📋 Layout</label>
+                                <div class="toggle-wrapper">
+                                    <span style="font-size: 0.85rem; color: var(--text-light);">One Method Per Line</span>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="layoutToggle">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="method-filters" id="methodFilters">
+                            <button class="method-filter get active" data-method="GET">GET</button>
+                            <button class="method-filter post active" data-method="POST">POST</button>
+                            <button class="method-filter put active" data-method="PUT">PUT</button>
+                            <button class="method-filter patch active" data-method="PATCH">PATCH</button>
+                            <button class="method-filter delete active" data-method="DELETE">DELETE</button>
+                            <button class="method-filter other active" data-method="OTHER">OPTIONS/HEAD</button>
+                        </div>
+
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                            <button class="btn btn-success" id="exportBtn">📥 Export to TXT</button>
+                        </div>
+                    </div>
+
+                    <!-- Endpoints List -->
+                    <div id="endpointsSection" class="hidden">
+                        <div class="content-section">
+                            <div id="endpointsList"></div>
+                        </div>
+                    </div>
+
+                    <!-- All Endpoints Accordion -->
+                    <div id="allEndpointsAccordion" class="hidden">
+                        <div class="content-section" style="margin-top: 2rem;">
+                            <div class="accordion-header" onclick="PostmanAnalyzer.toggleAllEndpointsAccordion()">
+                                <div>
+                                    <h3>📋 All Endpoints - Original URLs</h3>
+                                    <p>Click to expand/collapse all unique endpoints with their original URLs</p>
+                                </div>
+                                <span class="expand-icon" id="allEndpointsExpandIcon">▼</span>
+                            </div>
+                            <div class="accordion-content" id="allEndpointsContent">
+                                <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); max-height: 600px; overflow-y: auto;">
+                                    <div id="allEndpointsList"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <script>
-        // Constants
-        const MAX_FILE_SIZE = 31457280; // 30MB
-        const MAX_VARIABLE_ITERATIONS = 15;
-        const SEARCH_DEBOUNCE_MS = 300;
+        // Navigation System
+        const NavSystem = {
+            init() {
+                const navItems = document.querySelectorAll('.nav-item');
+                const menuToggle = document.getElementById('menuToggle');
+                const sidebar = document.getElementById('sidebar');
+                const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-        // Security: XSS Prevention Utilities
-        const SecurityUtils = {
-            escapeHtml: (text) => {
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
+                navItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        const view = item.dataset.view;
+                        this.switchView(view);
+                        
+                        if (window.innerWidth <= 968) {
+                            sidebar.classList.remove('mobile-open');
+                            sidebarOverlay.classList.remove('active');
+                        }
+                    });
+                });
+
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('mobile-open');
+                    sidebarOverlay.classList.toggle('active');
+                });
+
+                sidebarOverlay.addEventListener('click', () => {
+                    sidebar.classList.remove('mobile-open');
+                    sidebarOverlay.classList.remove('active');
+                });
             },
-            
-            // Minimal escaping for display - only escapes < > to prevent tag injection
-            // Preserves &, {, }, and other URL-safe characters
-            escapeForDisplay: (text) => {
-                if (typeof text !== 'string') return text;
-                return text
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;');
-            },
-            
-            sanitizeJSON: (obj) => {
-                if (typeof obj === 'string') {
-                    return SecurityUtils.escapeHtml(obj);
-                }
-                if (Array.isArray(obj)) {
-                    return obj.map(item => SecurityUtils.sanitizeJSON(item));
-                }
-                if (obj && typeof obj === 'object') {
-                    const sanitized = {};
-                    for (const [key, value] of Object.entries(obj)) {
-                        sanitized[SecurityUtils.escapeHtml(key)] = SecurityUtils.sanitizeJSON(value);
-                    }
-                    return sanitized;
-                }
-                return obj;
+
+            switchView(viewName) {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.view === viewName);
+                });
+
+                document.querySelectorAll('.content-view').forEach(view => {
+                    view.classList.toggle('active', view.id === viewName + 'View');
+                });
             }
         };
 
-        // Application State
-        const AppState = {
+        // Nmap Analyzer Logic
+        const NmapAnalyzer = {
+            allData: [],
+            filteredData: [],
+            sortColumn: -1,
+            sortAscending: true,
+            criticalServices: ['ssh', 'telnet', 'ftp', 'http', 'https', 'rdp', 'ms-wbt-server', 
+                               'mysql', 'postgresql', 'mssql', 'smb', 'microsoft-ds', 'netbios-ssn'],
+
+            init() {
+                const uploadZone = document.getElementById('nmapUploadZone');
+                const fileInput = document.getElementById('nmapFileInput');
+                const parseBtn = document.getElementById('nmapParseBtn');
+                const clearBtn = document.getElementById('nmapClearBtn');
+                const searchBox = document.getElementById('nmapSearchBox');
+                const ipFilter = document.getElementById('nmapIpFilter');
+                const stateFilter = document.getElementById('nmapStateFilter');
+                const exportBtn = document.getElementById('nmapExportBtn');
+
+                uploadZone.addEventListener('click', () => fileInput.click());
+                
+                uploadZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadZone.style.borderColor = 'var(--primary)';
+                });
+                
+                uploadZone.addEventListener('dragleave', () => {
+                    uploadZone.style.borderColor = '';
+                });
+                
+                uploadZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadZone.style.borderColor = '';
+                    fileInput.files = e.dataTransfer.files;
+                    this.displaySelectedFiles();
+                });
+
+                fileInput.addEventListener('change', () => this.displaySelectedFiles());
+                parseBtn.addEventListener('click', () => this.handleFiles());
+                clearBtn.addEventListener('click', () => this.clear());
+                searchBox.addEventListener('input', () => this.applyFilters());
+                ipFilter.addEventListener('change', () => this.applyFilters());
+                stateFilter.addEventListener('change', () => this.applyFilters());
+                exportBtn.addEventListener('click', () => this.exportToCSV());
+            },
+
+            toggleUploadSection() {
+                const section = document.getElementById('nmapUploadSection');
+                const button = document.getElementById('nmapToggleUpload');
+                
+                if (section.classList.contains('collapsed')) {
+                    section.classList.remove('collapsed');
+                    button.textContent = 'Collapse';
+                } else {
+                    section.classList.add('collapsed');
+                    button.textContent = 'Expand';
+                }
+            },
+
+            displaySelectedFiles() {
+                const fileInput = document.getElementById('nmapFileInput');
+                const fileList = document.getElementById('nmapFileList');
+                
+                if (fileInput.files.length === 0) {
+                    fileList.innerHTML = '';
+                    return;
+                }
+                
+                const fileListDiv = document.createElement('div');
+                fileListDiv.className = 'file-list-compact';
+                fileListDiv.innerHTML = '<strong style="color: var(--primary); margin-right: 10px;">Files:</strong>';
+
+                Array.from(fileInput.files).forEach(file => {
+                    const isNmap = file.name.endsWith('.nmap');
+                    const fileTag = document.createElement('div');
+                    fileTag.className = isNmap ? 'file-tag nmap-file' : 'file-tag';
+                    fileTag.innerHTML = `<span>${isNmap ? '📋' : '📄'}</span><span>${file.name}</span>`;
+                    fileListDiv.appendChild(fileTag);
+                });
+                
+                fileList.innerHTML = '';
+                fileList.appendChild(fileListDiv);
+            },
+
+            async handleFiles() {
+                const fileInput = document.getElementById('nmapFileInput');
+                const loadingIndicator = document.getElementById('nmapLoadingIndicator');
+                
+                if (fileInput.files.length === 0) {
+                    alert('Please select files to upload');
+                    return;
+                }
+
+                loadingIndicator.classList.remove('hidden');
+                this.allData = [];
+
+                for (const file of fileInput.files) {
+                    const text = await file.text();
+                    
+                    let fileType = 'unknown';
+                    if (file.name.endsWith('.xml') || text.includes('<?xml')) {
+                        fileType = 'xml';
+                    } else if (text.includes('Nmap scan report') || (text.includes('PORT') && text.includes('STATE'))) {
+                        fileType = 'nmap';
+                    }
+
+                    try {
+                        if (fileType === 'nmap') {
+                            this.parseNmapText(text, file.name);
+                        } else if (fileType === 'xml') {
+                            const parser = new DOMParser();
+                            const xmlDoc = parser.parseFromString(text, 'text/xml');
+                            this.parseNmapXML(xmlDoc, file.name);
+                        }
+                    } catch (error) {
+                        console.error(`Error parsing ${file.name}:`, error);
+                    }
+                }
+
+                loadingIndicator.classList.add('hidden');
+                
+                if (this.allData.length > 0) {
+                    // Auto-collapse upload section
+                    document.getElementById('nmapUploadSection').classList.add('collapsed');
+                    document.getElementById('nmapToggleUpload').textContent = 'Expand';
+                    
+                    this.renderStats();
+                    this.populateIPFilter();
+                    this.applyFilters();
+                    
+                    document.getElementById('nmapStatsContainer').classList.remove('hidden');
+                    document.getElementById('nmapControlsSection').classList.remove('hidden');
+                    document.getElementById('nmapMainContent').classList.remove('hidden');
+                } else {
+                    alert('No valid data found in the files');
+                }
+            },
+
+            parseNmapText(text, sourceFile) {
+                const lines = text.split('\n');
+                let currentIP = null;
+                let currentHostname = 'N/A';
+                let inPortSection = false;
+
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed) continue;
+
+                    const hostMatch = trimmed.match(/Nmap scan report for (?:([^\s(]+)\s+\()?([0-9.]+)\)?/);
+                    if (hostMatch) {
+                        currentHostname = hostMatch[1] || 'N/A';
+                        currentIP = hostMatch[2];
+                        inPortSection = false;
+                        continue;
+                    }
+
+                    if (trimmed.includes('PORT') && trimmed.includes('STATE') && trimmed.includes('SERVICE')) {
+                        inPortSection = true;
+                        continue;
+                    }
+
+                    if (inPortSection && /^\d+\/(tcp|udp)/.test(trimmed)) {
+                        const portMatch = trimmed.match(/^(\d+)\/(tcp|udp)\s+(\S+(?:\|\S+)?)\s+(\S+)?(?:\s+(.*))?/);
+                        
+                        if (portMatch && currentIP) {
+                            const [, portNumber, protocol, state, service = 'unknown', details = ''] = portMatch;
+                            
+                            this.allData.push({
+                                ip: currentIP,
+                                hostname: currentHostname,
+                                portNumber,
+                                protocol,
+                                state,
+                                service,
+                                details: details.trim() || 'Unknown',
+                                sourceFile
+                            });
+                        }
+                    }
+                }
+            },
+
+            parseNmapXML(xmlDoc, sourceFile) {
+                const hosts = xmlDoc.querySelectorAll('host');
+
+                hosts.forEach(host => {
+                    const addressElem = host.querySelector('address');
+                    if (!addressElem) return;
+
+                    const ip = addressElem.getAttribute('addr') || 'Unknown';
+                    
+                    let hostname = 'N/A';
+                    const hostnameElem = host.querySelector('hostnames hostname');
+                    if (hostnameElem) {
+                        hostname = hostnameElem.getAttribute('name') || 'N/A';
+                    }
+
+                    const ports = host.querySelectorAll('ports port');
+                    ports.forEach(port => {
+                        const portNumber = port.getAttribute('portid') || 'Unknown';
+                        const protocol = port.getAttribute('protocol') || 'Unknown';
+
+                        const stateElem = port.querySelector('state');
+                        const state = stateElem ? (stateElem.getAttribute('state') || 'Unknown') : 'Unknown';
+
+                        let service = 'Unknown';
+                        let details = [];
+
+                        const serviceElem = port.querySelector('service');
+                        if (serviceElem) {
+                            service = serviceElem.getAttribute('name') || 'Unknown';
+                            
+                            const product = serviceElem.getAttribute('product');
+                            const version = serviceElem.getAttribute('version');
+                            const extrainfo = serviceElem.getAttribute('extrainfo');
+
+                            if (product) details.push(product);
+                            if (version) details.push(`(${version})`);
+                            if (extrainfo) details.push(extrainfo);
+                        }
+
+                        this.allData.push({
+                            ip,
+                            hostname,
+                            portNumber,
+                            protocol,
+                            state,
+                            service,
+                            details: details.join(' ') || 'Unknown',
+                            sourceFile
+                        });
+                    });
+                });
+            },
+
+            renderStats() {
+                const stats = {
+                    totalHosts: new Set(this.allData.map(d => d.ip)).size,
+                    totalPorts: this.allData.length,
+                    openPorts: this.allData.filter(d => d.state.includes('open')).length,
+                    closedPorts: this.allData.filter(d => d.state === 'closed').length,
+                    filteredPorts: this.allData.filter(d => d.state.includes('filtered')).length,
+                    uniqueServices: new Set(this.allData.map(d => d.service)).size
+                };
+
+                const html = `
+                    <div class="stat-card">
+                        <h3>Total Hosts</h3>
+                        <div class="number">${stats.totalHosts}</div>
+                        <div class="label">Scanned</div>
+                    </div>
+                    <div class="stat-card success">
+                        <h3>Open Ports</h3>
+                        <div class="number">${stats.openPorts}</div>
+                        <div class="label">Active</div>
+                    </div>
+                    <div class="stat-card danger">
+                        <h3>Closed Ports</h3>
+                        <div class="number">${stats.closedPorts}</div>
+                        <div class="label">Inactive</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <h3>Filtered Ports</h3>
+                        <div class="number">${stats.filteredPorts}</div>
+                        <div class="label">Protected</div>
+                    </div>
+                    <div class="stat-card info">
+                        <h3>Unique Services</h3>
+                        <div class="number">${stats.uniqueServices}</div>
+                        <div class="label">Discovered</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Ports</h3>
+                        <div class="number">${stats.totalPorts}</div>
+                        <div class="label">Analyzed</div>
+                    </div>
+                `;
+
+                document.getElementById('nmapStatsContainer').innerHTML = html;
+            },
+
+            populateIPFilter() {
+                const ips = [...new Set(this.allData.map(d => d.ip))].sort();
+                const select = document.getElementById('nmapIpFilter');
+                
+                const options = ips.map(ip => {
+                    const count = this.allData.filter(d => d.ip === ip).length;
+                    return `<option value="${ip}">${ip} (${count} ports)</option>`;
+                }).join('');
+
+                select.innerHTML = '<option value="all">All IP Addresses</option>' + options;
+            },
+
+            applyFilters() {
+                const searchTerm = document.getElementById('nmapSearchBox').value.toLowerCase();
+                const ipFilter = document.getElementById('nmapIpFilter').value;
+                const stateFilter = document.getElementById('nmapStateFilter').value;
+
+                this.filteredData = this.allData.filter(item => {
+                    const matchesSearch = !searchTerm || 
+                        item.ip.toLowerCase().includes(searchTerm) ||
+                        item.service.toLowerCase().includes(searchTerm) ||
+                        item.portNumber.toString().includes(searchTerm) ||
+                        item.details.toLowerCase().includes(searchTerm);
+                    
+                    const matchesIP = ipFilter === 'all' || item.ip === ipFilter;
+                    
+                    const matchesState = stateFilter === 'all' || 
+                        (stateFilter === 'open' && item.state.includes('open')) ||
+                        (stateFilter === 'filtered' && item.state.includes('filtered')) ||
+                        item.state === stateFilter;
+
+                    return matchesSearch && matchesIP && matchesState;
+                });
+
+                this.renderTable();
+            },
+
+            renderTable() {
+                const tbody = document.getElementById('nmapTableBody');
+                const resultsCount = document.getElementById('nmapResultsCount');
+                
+                resultsCount.textContent = `Showing ${this.filteredData.length} of ${this.allData.length} total entries`;
+
+                if (this.filteredData.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 50px; color: var(--text-light);">
+                                <div style="font-size: 3em; margin-bottom: 10px; opacity: 0.3;">🔍</div>
+                                <div>No results found</div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                const html = this.filteredData.map(item => {
+                    const isCritical = this.criticalServices.includes(item.service.toLowerCase()) && item.state.includes('open');
+                    const criticalBadge = isCritical ? '<span class="critical-badge">CRITICAL</span>' : '';
+                    const stateClass = item.state.toLowerCase().replace(/\|/g, '\\|');
+
+                    return `
+                        <tr data-state="${item.state.toLowerCase()}" data-ip="${item.ip}">
+                            <td>${item.ip}</td>
+                            <td>${item.hostname}</td>
+                            <td>${item.portNumber}</td>
+                            <td>${item.protocol.toUpperCase()}</td>
+                            <td><span class="state-badge ${stateClass}">${item.state.toUpperCase()}</span></td>
+                            <td>${item.service}${criticalBadge}</td>
+                            <td>${item.details}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                tbody.innerHTML = html;
+            },
+
+            exportToCSV() {
+                const headers = ['IP', 'Hostname', 'Port', 'Protocol', 'State', 'Service', 'Details'];
+                const csv = [headers.join(',')];
+                
+                this.filteredData.forEach(item => {
+                    const row = [
+                        item.ip,
+                        item.hostname,
+                        item.portNumber,
+                        item.protocol,
+                        item.state,
+                        item.service,
+                        `"${item.details}"`
+                    ];
+                    csv.push(row.join(','));
+                });
+                
+                const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `nmap-report-${Date.now()}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+            },
+
+            clear() {
+                document.getElementById('nmapFileInput').value = '';
+                document.getElementById('nmapFileList').innerHTML = '';
+                document.getElementById('nmapUploadSection').classList.remove('collapsed');
+                document.getElementById('nmapToggleUpload').textContent = 'Collapse';
+                document.getElementById('nmapStatsContainer').classList.add('hidden');
+                document.getElementById('nmapControlsSection').classList.add('hidden');
+                document.getElementById('nmapMainContent').classList.add('hidden');
+                this.allData = [];
+                this.filteredData = [];
+            }
+        };
+
+        function nmapSortTable(columnIndex) {
+            const table = document.getElementById('nmapMainTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.getElementsByTagName('tr'));
+            const headers = table.querySelectorAll('th.sortable');
+            
+            const dataRows = rows.filter(row => row.getAttribute('data-state'));
+            
+            if (dataRows.length === 0) return;
+            
+            if (NmapAnalyzer.sortColumn === columnIndex) {
+                NmapAnalyzer.sortAscending = !NmapAnalyzer.sortAscending;
+            } else {
+                NmapAnalyzer.sortColumn = columnIndex;
+                NmapAnalyzer.sortAscending = true;
+            }
+            
+            // Update header classes
+            headers.forEach(th => th.classList.remove('asc', 'desc'));
+            headers[columnIndex].classList.add(NmapAnalyzer.sortAscending ? 'asc' : 'desc');
+            
+            dataRows.sort((a, b) => {
+                const aValue = a.cells[columnIndex].textContent.trim().toLowerCase();
+                const bValue = b.cells[columnIndex].textContent.trim().toLowerCase();
+                
+                const aNum = parseFloat(aValue);
+                const bNum = parseFloat(bValue);
+                
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return NmapAnalyzer.sortAscending ? aNum - bNum : bNum - aNum;
+                }
+                
+                return NmapAnalyzer.sortAscending ? 
+                    aValue.localeCompare(bValue) : 
+                    bValue.localeCompare(aValue);
+            });
+            
+            dataRows.forEach(row => tbody.appendChild(row));
+        }
+
+        // Postman Analyzer Logic
+        const PostmanAnalyzer = {
+            MAX_FILE_SIZE: 31457280,
+            MAX_VARIABLE_ITERATIONS: 15,
+            SEARCH_DEBOUNCE_MS: 300,
+
             collections: [],
             environments: {},
-            allEndpoints: [], // All parsed endpoints with duplicates
-            uniqueEndpoints: [], // Deduplicated endpoints
+            allEndpoints: [],
+            uniqueEndpoints: [],
             filteredEndpoints: [],
             activeMethodFilters: new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD']),
             searchTerm: '',
             sortBy: 'path-asc',
             onePerLine: false,
-            duplicateCount: 0
-        };
+            duplicateCount: 0,
 
-        // Display selected files
-        function displaySelectedFiles(inputId, indicatorId) {
-            const input = document.getElementById(inputId);
-            const indicator = document.getElementById(indicatorId);
-            
-            if (input.files.length === 0) {
-                indicator.innerHTML = '';
-                return;
-            }
-            
-            const tags = Array.from(input.files).map(file => {
-                const size = (file.size / 1024).toFixed(1);
-                const sizeText = size > 1024 ? `${(size / 1024).toFixed(1)} MB` : `${size} KB`;
-                return `
-                    <span class="file-tag">
-                        <span class="file-tag-icon">📄</span>
-                        <span>${SecurityUtils.escapeHtml(file.name)}</span>
-                        <span style="opacity: 0.7;">(${sizeText})</span>
-                    </span>
-                `;
-            }).join('');
-            
-            indicator.innerHTML = tags;
-        }
+            init() {
+                const collectionInput = document.getElementById('collectionFiles');
+                const environmentInput = document.getElementById('environmentFiles');
+                const parseBtn = document.getElementById('parseBtn');
+                const clearBtn = document.getElementById('clearBtn');
+                const searchInput = document.getElementById('searchInput');
+                const sortSelect = document.getElementById('sortSelect');
+                const layoutToggle = document.getElementById('layoutToggle');
+                const exportBtn = document.getElementById('exportBtn');
 
-        // Variable Resolution with improved iteration
-        function resolveVariables(str, variables, maxIterations = MAX_VARIABLE_ITERATIONS) {
-            if (typeof str !== 'string') return str;
-            
-            let resolved = str;
-            let iteration = 0;
-            let hasChanges = true;
-            
-            while (iteration < maxIterations && hasChanges) {
-                const before = resolved;
-                resolved = resolved.replace(/\{\{([^}]+)\}\}/g, (match, varName) => {
-                    const trimmedName = varName.trim();
-                    return variables[trimmedName] !== undefined ? variables[trimmedName] : match;
+                collectionInput.addEventListener('change', () => this.displaySelectedFiles('collectionFiles', 'collectionFilesIndicator'));
+                environmentInput.addEventListener('change', () => this.displaySelectedFiles('environmentFiles', 'environmentFilesIndicator'));
+                parseBtn.addEventListener('click', () => this.parseCollections());
+                clearBtn.addEventListener('click', () => this.clearAll());
+                searchInput.addEventListener('input', this.debounce((e) => {
+                    this.searchTerm = e.target.value;
+                    this.applyFiltersAndSort();
+                    this.renderEndpoints();
+                }, this.SEARCH_DEBOUNCE_MS));
+                sortSelect.addEventListener('change', (e) => {
+                    this.sortBy = e.target.value;
+                    this.applyFiltersAndSort();
+                    this.renderEndpoints();
+                });
+                layoutToggle.addEventListener('change', (e) => {
+                    this.onePerLine = e.target.checked;
+                    this.renderEndpoints();
+                });
+                exportBtn.addEventListener('click', () => this.exportToTxt());
+
+                document.querySelectorAll('.method-filter').forEach(button => {
+                    button.addEventListener('click', () => this.handleMethodFilter(button));
+                });
+            },
+
+            toggleUploadSection() {
+                const section = document.getElementById('postmanUploadSection');
+                const button = document.getElementById('postmanToggleUpload');
+                
+                if (section.classList.contains('collapsed')) {
+                    section.classList.remove('collapsed');
+                    button.textContent = 'Collapse';
+                } else {
+                    section.classList.add('collapsed');
+                    button.textContent = 'Expand';
+                }
+            },
+
+            displaySelectedFiles(inputId, indicatorId) {
+                const input = document.getElementById(inputId);
+                const indicator = document.getElementById(indicatorId);
+                
+                if (input.files.length === 0) {
+                    indicator.innerHTML = '';
+                    return;
+                }
+                
+                const tags = Array.from(input.files).map(file => {
+                    const size = (file.size / 1024).toFixed(1);
+                    const sizeText = size > 1024 ? `${(size / 1024).toFixed(1)} MB` : `${size} KB`;
+                    return `
+                        <span class="file-tag">
+                            <span>📄</span>
+                            <span>${this.escapeHtml(file.name)}</span>
+                            <span style="opacity: 0.7;">(${sizeText})</span>
+                        </span>
+                    `;
+                }).join('');
+                
+                indicator.innerHTML = tags;
+            },
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            },
+
+            escapeForDisplay(text) {
+                if (typeof text !== 'string') return text;
+                return text
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+            },
+
+            resolveVariables(str, variables, maxIterations = 15) {
+                if (typeof str !== 'string') return str;
+                
+                let resolved = str;
+                let iteration = 0;
+                let hasChanges = true;
+                
+                while (iteration < maxIterations && hasChanges) {
+                    const before = resolved;
+                    resolved = resolved.replace(/\{\{([^}]+)\}\}/g, (match, varName) => {
+                        const trimmedName = varName.trim();
+                        return variables[trimmedName] !== undefined ? variables[trimmedName] : match;
+                    });
+                    
+                    hasChanges = (resolved !== before);
+                    iteration++;
+                }
+                
+                return resolved;
+            },
+
+            normalizeUrl(url) {
+                if (!url) return '';
+                
+                let normalized = url;
+                
+                normalized = normalized.replace(
+                    /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
+                    '{uuid}'
+                );
+                
+                normalized = normalized.replace(
+                    /\/(\d+)(?=\/|$|\?|#)/g,
+                    (match, number, offset, string) => {
+                        const beforeMatch = string.substring(Math.max(0, offset - 2), offset);
+                        if (/v$/i.test(beforeMatch)) {
+                            return match;
+                        }
+                        return '/{id}';
+                    }
+                );
+                
+                normalized = normalized.replace(
+                    /([?&][\w-]+)=([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/gi,
+                    '$1={uuid}'
+                );
+                
+                normalized = normalized.replace(
+                    /([?&][\w-]+)=(\d+)/g,
+                    '$1={id}'
+                );
+                
+                return normalized;
+            },
+
+            parseCollectionItems(items, variables, collectionName = '') {
+                const endpoints = [];
+                
+                if (!items || !Array.isArray(items)) return endpoints;
+                
+                for (const item of items) {
+                    if (item.item) {
+                        endpoints.push(...this.parseCollectionItems(item.item, variables, collectionName));
+                    } else if (item.request) {
+                        const request = item.request;
+                        const method = (request.method || 'GET').toUpperCase();
+                        
+                        let url = '';
+                        if (typeof request.url === 'string') {
+                            url = request.url;
+                        } else if (request.url && request.url.raw) {
+                            url = request.url.raw;
+                        } else if (request.url && Array.isArray(request.url.path)) {
+                            const protocol = request.url.protocol || 'http';
+                            const host = Array.isArray(request.url.host) ? request.url.host.join('.') : (request.url.host || '');
+                            const path = request.url.path.join('/');
+                            url = `${protocol}://${host}/${path}`;
+                        }
+                        
+                        url = this.resolveVariables(url, variables);
+                        const normalizedUrl = this.normalizeUrl(url);
+                        
+                        endpoints.push({
+                            name: this.escapeHtml(item.name || 'Unnamed Request'),
+                            method: method,
+                            originalUrl: this.escapeHtml(url),
+                            normalizedUrl: normalizedUrl,
+                            collection: this.escapeHtml(collectionName),
+                            uniqueKey: `${method}:::${normalizedUrl}`
+                        });
+                    }
+                }
+                
+                return endpoints;
+            },
+
+            deduplicateEndpoints(endpoints) {
+                const seen = new Map();
+                const unique = [];
+                
+                for (const endpoint of endpoints) {
+                    const key = endpoint.uniqueKey;
+                    if (!seen.has(key)) {
+                        seen.set(key, endpoint);
+                        unique.push(endpoint);
+                    }
+                }
+                
+                const duplicateCount = endpoints.length - unique.length;
+                return { unique, duplicateCount };
+            },
+
+            async parseCollections() {
+                const collectionInput = document.getElementById('collectionFiles');
+                const environmentInput = document.getElementById('environmentFiles');
+                const warningContainer = document.getElementById('warningContainer');
+                
+                warningContainer.innerHTML = '';
+                
+                if (!collectionInput.files.length) {
+                    warningContainer.innerHTML = '<div class="warning-message">⚠️ Please select at least one collection file.</div>';
+                    return;
+                }
+                
+                try {
+                    const variables = {};
+                    
+                    for (const file of environmentInput.files) {
+                        try {
+                            let content = await file.text();
+                            content = content.trim();
+                            
+                            const openBraces = (content.match(/\{/g) || []).length;
+                            const closeBraces = (content.match(/\}/g) || []).length;
+                            
+                            if (openBraces > closeBraces) {
+                                content += '\n}';
+                                warningContainer.innerHTML += `<div class="info-message">ℹ️ Auto-fixed "${this.escapeHtml(file.name)}" - added missing closing brace</div>`;
+                            }
+                            
+                            const env = JSON.parse(content);
+                            
+                            if (env.values && Array.isArray(env.values)) {
+                                env.values.forEach(v => {
+                                    if (v.key && v.value) {
+                                        variables[v.key] = v.value;
+                                    }
+                                });
+                            }
+                        } catch (envError) {
+                            warningContainer.innerHTML += `<div class="warning-message">⚠️ Skipping environment file "${this.escapeHtml(file.name)}": ${this.escapeHtml(envError.message)}</div>`;
+                        }
+                    }
+                    
+                    this.environments = variables;
+                    
+                    const allEndpoints = [];
+                    let successCount = 0;
+                    let failCount = 0;
+                    
+                    for (const file of collectionInput.files) {
+                        try {
+                            const content = await file.text();
+                            const collection = JSON.parse(content);
+                            
+                            const collectionName = collection.info?.name || file.name;
+                            const items = collection.item || [];
+                            
+                            const endpoints = this.parseCollectionItems(items, variables, collectionName);
+                            allEndpoints.push(...endpoints);
+                            successCount++;
+                            
+                        } catch (collError) {
+                            failCount++;
+                            warningContainer.innerHTML += `<div class="warning-message">❌ Error parsing "${this.escapeHtml(file.name)}": ${this.escapeHtml(collError.message)}</div>`;
+                        }
+                    }
+                    
+                    const { unique, duplicateCount } = this.deduplicateEndpoints(allEndpoints);
+                    
+                    this.allEndpoints = allEndpoints;
+                    this.uniqueEndpoints = unique;
+                    this.filteredEndpoints = unique;
+                    this.duplicateCount = duplicateCount;
+                    
+                    if (unique.length > 0) {
+                        // Auto-collapse upload section
+                        document.getElementById('postmanUploadSection').classList.add('collapsed');
+                        document.getElementById('postmanToggleUpload').textContent = 'Expand';
+                        
+                        this.updateStats();
+                        this.applyFiltersAndSort();
+                        this.renderEndpoints();
+                        this.renderAllEndpointsList();
+                        
+                        document.getElementById('statsSection').classList.remove('hidden');
+                        document.getElementById('controlsSection').classList.remove('hidden');
+                        document.getElementById('allEndpointsAccordion').classList.remove('hidden');
+                        document.getElementById('endpointsSection').classList.remove('hidden');
+                    }
+                    
+                    if (successCount > 0) {
+                        let message = `✅ Successfully parsed ${successCount} collection file(s) with ${allEndpoints.length} total endpoints!`;
+                        if (duplicateCount > 0) {
+                            message += ` Removed ${duplicateCount} duplicate(s), ${unique.length} unique endpoints remain.`;
+                        }
+                        warningContainer.innerHTML += `<div class="success-message">${message}</div>`;
+                    }
+                    
+                } catch (error) {
+                    warningContainer.innerHTML = `<div class="warning-message">❌ Error parsing files: ${this.escapeHtml(error.message)}</div>`;
+                    console.error('Parse error:', error);
+                }
+            },
+
+            updateStats() {
+                const uniqueEndpoints = this.uniqueEndpoints.length;
+                const methodCounts = new Set(this.uniqueEndpoints.map(e => e.method)).size;
+                
+                document.getElementById('uniqueEndpoints').textContent = uniqueEndpoints;
+                document.getElementById('totalMethods').textContent = methodCounts;
+                document.getElementById('totalRequests').textContent = this.allEndpoints.length;
+                document.getElementById('duplicatesRemoved').textContent = this.duplicateCount;
+            },
+
+            applyFiltersAndSort() {
+                let filtered = this.uniqueEndpoints;
+                
+                filtered = filtered.filter(endpoint => {
+                    const method = endpoint.method.toUpperCase();
+                    if (['OPTIONS', 'HEAD'].includes(method)) {
+                        return this.activeMethodFilters.has('OPTIONS') || this.activeMethodFilters.has('HEAD');
+                    }
+                    return this.activeMethodFilters.has(method);
                 });
                 
-                hasChanges = (resolved !== before);
-                iteration++;
-            }
-            
-            return resolved;
-        }
-
-        // Improved URL Normalization - DOES NOT encode { } braces
-        function normalizeUrl(url) {
-            if (!url) return '';
-            
-            let normalized = url;
-            
-            // Step 1: Convert UUIDs to {uuid}
-            normalized = normalized.replace(
-                /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
-                '{uuid}'
-            );
-            
-            // Step 2: Convert numeric IDs to {id}, but preserve version numbers like v1, v2, v3
-            // This regex looks for numbers that are NOT preceded by 'v' and are path segments
-            normalized = normalized.replace(
-                /\/(\d+)(?=\/|$|\?|#)/g,
-                (match, number, offset, string) => {
-                    // Check if this number is preceded by 'v' (case insensitive)
-                    const beforeMatch = string.substring(Math.max(0, offset - 2), offset);
-                    if (/v$/i.test(beforeMatch)) {
-                        return match; // Keep version numbers as-is
+                if (this.searchTerm) {
+                    const term = this.searchTerm.toLowerCase();
+                    filtered = filtered.filter(endpoint => 
+                        endpoint.normalizedUrl.toLowerCase().includes(term) ||
+                        endpoint.method.toLowerCase().includes(term) ||
+                        endpoint.name.toLowerCase().includes(term) ||
+                        endpoint.originalUrl.toLowerCase().includes(term)
+                    );
+                }
+                
+                filtered.sort((a, b) => {
+                    switch (this.sortBy) {
+                        case 'path-asc':
+                            return a.normalizedUrl.localeCompare(b.normalizedUrl);
+                        case 'path-desc':
+                            return b.normalizedUrl.localeCompare(a.normalizedUrl);
+                        case 'method-asc':
+                            return a.method.localeCompare(b.method);
+                        case 'method-desc':
+                            return b.method.localeCompare(a.method);
+                        case 'name-asc':
+                            return a.name.localeCompare(b.name);
+                        case 'name-desc':
+                            return b.name.localeCompare(a.name);
+                        default:
+                            return 0;
                     }
-                    return '/{id}';
-                }
-            );
-            
-            // Step 3: Normalize query parameters that look like IDs
-            normalized = normalized.replace(
-                /([?&][\w-]+)=([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/gi,
-                '$1={uuid}'
-            );
-            
-            normalized = normalized.replace(
-                /([?&][\w-]+)=(\d+)/g,
-                '$1={id}'
-            );
-            
-            return normalized;
-        }
+                });
+                
+                this.filteredEndpoints = filtered;
+            },
 
-        // Parse Collection Items Recursively
-        function parseCollectionItems(items, variables, collectionName = '') {
-            const endpoints = [];
-            
-            if (!items || !Array.isArray(items)) return endpoints;
-            
-            for (const item of items) {
-                if (item.item) {
-                    // It's a folder, recurse
-                    endpoints.push(...parseCollectionItems(item.item, variables, collectionName));
-                } else if (item.request) {
-                    // It's a request
-                    const request = item.request;
-                    const method = (request.method || 'GET').toUpperCase();
-                    
-                    // Get URL
-                    let url = '';
-                    if (typeof request.url === 'string') {
-                        url = request.url;
-                    } else if (request.url && request.url.raw) {
-                        url = request.url.raw;
-                    } else if (request.url && Array.isArray(request.url.path)) {
-                        const protocol = request.url.protocol || 'http';
-                        const host = Array.isArray(request.url.host) ? request.url.host.join('.') : (request.url.host || '');
-                        const path = request.url.path.join('/');
-                        url = `${protocol}://${host}/${path}`;
-                    }
-                    
-                    // Resolve variables BEFORE normalization
-                    url = resolveVariables(url, variables);
-                    
-                    // Normalize URL
-                    const normalizedUrl = normalizeUrl(url);
-                    
-                    endpoints.push({
-                        name: SecurityUtils.escapeHtml(item.name || 'Unnamed Request'),
-                        method: method,
-                        originalUrl: SecurityUtils.escapeHtml(url),
-                        normalizedUrl: normalizedUrl, // Don't escape - used for grouping/comparison
-                        collection: SecurityUtils.escapeHtml(collectionName),
-                        // Create a unique key for deduplication
-                        uniqueKey: `${method}:::${normalizedUrl}`
-                    });
-                }
-            }
-            
-            return endpoints;
-        }
-
-        // Deduplicate endpoints based on method + normalized URL
-        function deduplicateEndpoints(endpoints) {
-            const seen = new Map();
-            const unique = [];
-            
-            for (const endpoint of endpoints) {
-                const key = endpoint.uniqueKey;
-                if (!seen.has(key)) {
-                    seen.set(key, endpoint);
-                    unique.push(endpoint);
-                }
-            }
-            
-            const duplicateCount = endpoints.length - unique.length;
-            return { unique, duplicateCount };
-        }
-
-        // Update progress bar
-        function updateProgress(percent) {
-            const progressContainer = document.getElementById('progressContainer');
-            const progressFill = document.getElementById('progressFill');
-            
-            if (percent > 0 && percent < 100) {
-                progressContainer.classList.remove('hidden');
-                progressFill.style.width = percent + '%';
-            } else {
-                progressContainer.classList.add('hidden');
-                progressFill.style.width = '0%';
-            }
-        }
-
-        // Parse Collections
-        async function parseCollections() {
-            const collectionInput = document.getElementById('collectionFiles');
-            const environmentInput = document.getElementById('environmentFiles');
-            const warningContainer = document.getElementById('warningContainer');
-            
-            warningContainer.innerHTML = '';
-            updateProgress(0);
-            
-            if (!collectionInput.files.length) {
-                warningContainer.innerHTML = '<div class="warning-message">⚠️ Please select at least one collection file.</div>';
-                return;
-            }
-            
-            try {
-                // Validate file sizes
-                const allFiles = [...collectionInput.files, ...environmentInput.files];
-                const oversizedFiles = allFiles.filter(f => f.size > MAX_FILE_SIZE);
+            renderEndpoints() {
+                const container = document.getElementById('endpointsList');
                 
-                if (oversizedFiles.length > 0) {
-                    const fileNames = oversizedFiles.map(f => f.name).join(', ');
-                    warningContainer.innerHTML = `<div class="warning-message">⚠️ Warning: The following files exceed 30MB: ${SecurityUtils.escapeHtml(fileNames)}. Processing may be slow.</div>`;
-                }
-                
-                updateProgress(10);
-                
-                // Parse environment files
-                const variables = {};
-                
-                for (let i = 0; i < environmentInput.files.length; i++) {
-                    const file = environmentInput.files[i];
-                    try {
-                        let content = await file.text();
-                        
-                        // Try to auto-fix common JSON issues
-                        content = content.trim();
-                        
-                        // Check if missing closing brace
-                        const openBraces = (content.match(/\{/g) || []).length;
-                        const closeBraces = (content.match(/\}/g) || []).length;
-                        
-                        if (openBraces > closeBraces) {
-                            content += '\n}';
-                            warningContainer.innerHTML += `<div class="info-message">ℹ️ Auto-fixed "${SecurityUtils.escapeHtml(file.name)}" - added missing closing brace</div>`;
-                        }
-                        
-                        const env = JSON.parse(content);
-                        
-                        if (env.values && Array.isArray(env.values)) {
-                            env.values.forEach(v => {
-                                if (v.key && v.value) {
-                                    variables[v.key] = v.value;
-                                }
-                            });
-                        }
-                    } catch (envError) {
-                        warningContainer.innerHTML += `<div class="warning-message">⚠️ Skipping environment file "${SecurityUtils.escapeHtml(file.name)}": ${SecurityUtils.escapeHtml(envError.message)}</div>`;
-                        console.error(`Environment file error (${file.name}):`, envError);
-                    }
-                }
-                
-                AppState.environments = variables;
-                
-                updateProgress(30);
-                
-                // Parse collection files
-                const allEndpoints = [];
-                let successCount = 0;
-                let failCount = 0;
-                const totalFiles = collectionInput.files.length;
-                
-                for (let i = 0; i < totalFiles; i++) {
-                    const file = collectionInput.files[i];
-                    const fileProgress = 30 + ((i / totalFiles) * 50);
-                    updateProgress(fileProgress);
-                    
-                    try {
-                        const content = await file.text();
-                        
-                        // Validate JSON before parsing
-                        let collection;
-                        try {
-                            collection = JSON.parse(content);
-                        } catch (jsonError) {
-                            throw new Error(`Invalid JSON: ${jsonError.message}`);
-                        }
-                        
-                        const collectionName = collection.info?.name || file.name;
-                        const items = collection.item || [];
-                        
-                        const endpoints = parseCollectionItems(items, variables, collectionName);
-                        allEndpoints.push(...endpoints);
-                        successCount++;
-                        
-                    } catch (collError) {
-                        failCount++;
-                        warningContainer.innerHTML += `<div class="warning-message">❌ Error parsing "${SecurityUtils.escapeHtml(file.name)}": ${SecurityUtils.escapeHtml(collError.message)}</div>`;
-                        console.error(`Collection file error (${file.name}):`, collError);
-                    }
-                }
-                
-                updateProgress(80);
-                
-                // Deduplicate endpoints
-                const { unique, duplicateCount } = deduplicateEndpoints(allEndpoints);
-                
-                AppState.allEndpoints = allEndpoints;
-                AppState.uniqueEndpoints = unique;
-                AppState.filteredEndpoints = unique;
-                AppState.duplicateCount = duplicateCount;
-                
-                updateProgress(90);
-                
-                if (unique.length > 0) {
-                    updateStats();
-                    applyFiltersAndSort();
-                    renderEndpoints();
-                    renderAllEndpointsList();
-                    
-                    // Show sections
-                    document.getElementById('statsSection').classList.remove('hidden');
-                    document.getElementById('controlsSection').classList.remove('hidden');
-                    document.getElementById('allEndpointsAccordion').classList.remove('hidden');
-                    document.getElementById('endpointsSection').classList.remove('hidden');
-                }
-                
-                updateProgress(100);
-                
-                // Show results summary
-                if (successCount > 0) {
-                    let message = `✅ Successfully parsed ${successCount} collection file(s) with ${allEndpoints.length} total endpoints!`;
-                    if (duplicateCount > 0) {
-                        message += ` Removed ${duplicateCount} duplicate(s), ${unique.length} unique endpoints remain.`;
-                    }
-                    warningContainer.innerHTML += `<div class="success-message">${message}</div>`;
-                }
-                
-                if (failCount > 0 && successCount === 0) {
-                    warningContainer.innerHTML += `<div class="warning-message">❌ Failed to parse all ${failCount} file(s). Please check the errors above.</div>`;
-                }
-                
-                // Hide progress after a short delay
-                setTimeout(() => updateProgress(0), 1000);
-                
-            } catch (error) {
-                updateProgress(0);
-                warningContainer.innerHTML = `
-                    <div class="warning-message">
-                        ❌ Error parsing files: ${SecurityUtils.escapeHtml(error.message)}
-                        <br><br>
-                        <strong>Troubleshooting tips:</strong>
-                        <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
-                            <li>Ensure your JSON files are valid (you can check at jsonlint.com)</li>
-                            <li>Make sure files are exported from Postman (not manually edited)</li>
-                            <li>Check that files aren't corrupted or truncated</li>
-                            <li>Try parsing files one at a time to identify the problematic file</li>
-                        </ul>
-                    </div>
-                `;
-                console.error('Parse error:', error);
-            }
-        }
-
-        // Update Statistics
-        function updateStats() {
-            const uniqueEndpoints = AppState.uniqueEndpoints.length;
-            
-            const methodCounts = new Set(
-                AppState.uniqueEndpoints.map(e => e.method)
-            ).size;
-            
-            document.getElementById('uniqueEndpoints').textContent = uniqueEndpoints;
-            document.getElementById('totalMethods').textContent = methodCounts;
-            document.getElementById('totalRequests').textContent = AppState.allEndpoints.length;
-            document.getElementById('duplicatesRemoved').textContent = AppState.duplicateCount;
-        }
-
-        // Apply Filters and Sort
-        function applyFiltersAndSort() {
-            let filtered = AppState.uniqueEndpoints;
-            
-            // Apply method filters
-            filtered = filtered.filter(endpoint => {
-                const method = endpoint.method.toUpperCase();
-                if (['OPTIONS', 'HEAD'].includes(method)) {
-                    return AppState.activeMethodFilters.has('OPTIONS') || AppState.activeMethodFilters.has('HEAD');
-                }
-                return AppState.activeMethodFilters.has(method);
-            });
-            
-            // Apply search
-            if (AppState.searchTerm) {
-                const term = AppState.searchTerm.toLowerCase();
-                filtered = filtered.filter(endpoint => 
-                    endpoint.normalizedUrl.toLowerCase().includes(term) ||
-                    endpoint.method.toLowerCase().includes(term) ||
-                    endpoint.name.toLowerCase().includes(term) ||
-                    endpoint.originalUrl.toLowerCase().includes(term)
-                );
-            }
-            
-            // Apply sort
-            filtered.sort((a, b) => {
-                switch (AppState.sortBy) {
-                    case 'path-asc':
-                        return a.normalizedUrl.localeCompare(b.normalizedUrl);
-                    case 'path-desc':
-                        return b.normalizedUrl.localeCompare(a.normalizedUrl);
-                    case 'method-asc':
-                        return a.method.localeCompare(b.method);
-                    case 'method-desc':
-                        return b.method.localeCompare(a.method);
-                    case 'name-asc':
-                        return a.name.localeCompare(b.name);
-                    case 'name-desc':
-                        return b.name.localeCompare(a.name);
-                    default:
-                        return 0;
-                }
-            });
-            
-            AppState.filteredEndpoints = filtered;
-        }
-
-        // Render All Endpoints List
-        function renderAllEndpointsList() {
-            const container = document.getElementById('allEndpointsList');
-            
-            if (AppState.uniqueEndpoints.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">No endpoints to display</p>';
-                return;
-            }
-            
-            const html = `
-                <div class="all-endpoints-list">
-                    ${AppState.uniqueEndpoints.map((endpoint, index) => `
-                        <div class="all-endpoint-row">
-                            <span class="method-badge ${endpoint.method.toLowerCase()}">${endpoint.method}</span>
-                            <div class="all-endpoint-info">
-                                <div class="all-endpoint-name">${endpoint.name}</div>
-                                <div class="all-endpoint-url">${endpoint.originalUrl}</div>
-                                <div class="all-endpoint-collection">📦 ${endpoint.collection}</div>
-                            </div>
+                if (this.filteredEndpoints.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 4rem 2rem; color: var(--text-light);">
+                            <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;">🔍</div>
+                            <p>No endpoints found matching current filters.</p>
                         </div>
-                    `).join('')}
-                </div>
-            `;
-            
-            container.innerHTML = html;
-        }
+                    `;
+                    return;
+                }
 
-        // Toggle All Endpoints Accordion
-        function toggleAllEndpointsAccordion() {
-            const content = document.getElementById('allEndpointsContent');
-            const icon = document.getElementById('allEndpointsExpandIcon');
-            
-            if (content.style.maxHeight === '0px' || content.style.maxHeight === '') {
-                content.style.maxHeight = '5000px'; // Increased to accommodate large lists
-                content.style.overflow = 'visible';
-                icon.style.transform = 'rotate(180deg)';
-            } else {
-                content.style.maxHeight = '0px';
-                content.style.overflow = 'hidden';
-                icon.style.transform = 'rotate(0deg)';
-            }
-        }
+                const hostGroups = {};
 
-        // Render Endpoints with Host Grouping
-        function renderEndpoints() {
-            const container = document.getElementById('endpointsList');
-            
-            if (AppState.filteredEndpoints.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">🔍</div>
-                        <p>No endpoints found matching current filters.</p>
+                this.filteredEndpoints.forEach(ep => {
+                    let host = "Unknown Host";
+                    let displayPath = ep.normalizedUrl;
+
+                    try {
+                        const urlToParse = ep.originalUrl.includes('://') ? ep.originalUrl : 'http://' + ep.originalUrl;
+                        const url = new URL(urlToParse);
+                        host = `${url.protocol}//${url.host}`;
+                        
+                        let normalizedPath = ep.normalizedUrl;
+                        normalizedPath = normalizedPath.replace(/^https?:\/\/[^\/]+/, '');
+                        
+                        if (!normalizedPath || !normalizedPath.startsWith('/')) {
+                            normalizedPath = '/' + normalizedPath;
+                        }
+                        
+                        displayPath = normalizedPath;
+                    } catch(e) {
+                        if (ep.originalUrl.includes('{{') || ep.originalUrl.includes('{')) {
+                            host = "Unresolved/Variable Hosts";
+                        }
+                        displayPath = ep.normalizedUrl.replace(/^https?:\/\/[^\/]+/, '') || ep.normalizedUrl;
+                    }
+
+                    if (!hostGroups[host]) hostGroups[host] = [];
+                    hostGroups[host].push({ ...ep, displayPath });
+                });
+
+                let html = `<div class="report-container">`;
+
+                Object.keys(hostGroups).sort().forEach(host => {
+                    html += `<span class="report-section-title">Target Host</span>`;
+                    html += `<span class="report-line">-----------------</span>`;
+                    html += `<span class="report-line"><strong>${this.escapeHtml(host)}</strong></span><br>`;
+
+                    html += `<span class="report-section-title">Endpoints in Scope</span>`;
+                    html += `<span class="report-line">------------------------</span>`;
+                    
+                    const endpointsInHost = hostGroups[host];
+
+                    if (this.onePerLine) {
+                        endpointsInHost.sort((a, b) => a.displayPath.localeCompare(b.displayPath)).forEach(ep => {
+                            html += `<span class="report-line">[${ep.method}] ${this.escapeForDisplay(ep.displayPath)}</span>`;
+                        });
+                    } else {
+                        const pathGroup = {};
+                        endpointsInHost.forEach(ep => {
+                            if (!pathGroup[ep.displayPath]) pathGroup[ep.displayPath] = new Set();
+                            pathGroup[ep.displayPath].add(ep.method);
+                        });
+
+                        Object.keys(pathGroup).sort().forEach(path => {
+                            const methods = Array.from(pathGroup[path]).sort().join(',');
+                            html += `<span class="report-line">[${methods}] ${this.escapeForDisplay(path)}</span>`;
+                        });
+                    }
+
+                    html += `<br><br>`; 
+                });
+
+                html += `</div>`;
+                container.innerHTML = html;
+            },
+
+            renderAllEndpointsList() {
+                const container = document.getElementById('allEndpointsList');
+                
+                if (this.uniqueEndpoints.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 2rem;">No endpoints to display</p>';
+                    return;
+                }
+                
+                const html = `
+                    <div class="all-endpoints-list">
+                        ${this.uniqueEndpoints.map(endpoint => `
+                            <div class="all-endpoint-row">
+                                <span class="method-badge ${endpoint.method.toLowerCase()}">${endpoint.method}</span>
+                                <div class="all-endpoint-info">
+                                    <div class="all-endpoint-name">${endpoint.name}</div>
+                                    <div class="all-endpoint-url">${endpoint.originalUrl}</div>
+                                    <div class="all-endpoint-collection">📦 ${endpoint.collection}</div>
+                                </div>
+                            </div>
+                        `).join('')}
                     </div>
                 `;
-                return;
-            }
-
-            // Group data by Host
-            const hostGroups = {};
-
-            AppState.filteredEndpoints.forEach(ep => {
-                let host = "Unknown Host";
-                let displayPath = ep.normalizedUrl;
-
-                try {
-                    // Handle URLs with or without protocol - use original URL for host extraction
-                    const urlToParse = ep.originalUrl.includes('://') ? ep.originalUrl : 'http://' + ep.originalUrl;
-                    const url = new URL(urlToParse);
-                    host = `${url.protocol}//${url.host}`;
-                    
-                    // Extract path from normalized URL without URL encoding
-                    // Don't use URL constructor as it will encode { and }
-                    let normalizedPath = ep.normalizedUrl;
-                    
-                    // Remove protocol and host if present
-                    normalizedPath = normalizedPath.replace(/^https?:\/\/[^\/]+/, '');
-                    
-                    // If normalizedPath is empty or doesn't start with /, try to extract from original structure
-                    if (!normalizedPath || !normalizedPath.startsWith('/')) {
-                        normalizedPath = '/' + normalizedPath;
-                    }
-                    
-                    displayPath = normalizedPath;
-                } catch(e) {
-                    // If URL parsing fails, check if it contains variables
-                    if (ep.originalUrl.includes('{{') || ep.originalUrl.includes('{')) {
-                        host = "Unresolved/Variable Hosts";
-                    }
-                    // Extract just the path portion
-                    displayPath = ep.normalizedUrl.replace(/^https?:\/\/[^\/]+/, '') || ep.normalizedUrl;
-                }
-
-                if (!hostGroups[host]) hostGroups[host] = [];
-                hostGroups[host].push({ ...ep, displayPath });
-            });
-
-            // Generate HTML Output
-            let html = `<div class="report-container">`;
-
-            Object.keys(hostGroups).sort().forEach(host => {
-                html += `<span class="report-section-title">Target Host</span>`;
-                html += `<span class="report-line">-----------------</span>`;
-                html += `<span class="report-line"><strong>${SecurityUtils.escapeHtml(host)}</strong></span><br>`;
-
-                html += `<span class="report-section-title">Endpoints in Scope</span>`;
-                html += `<span class="report-line">------------------------</span>`;
                 
-                const endpointsInHost = hostGroups[host];
+                container.innerHTML = html;
+            },
 
-                if (AppState.onePerLine) {
-                    // MODE: One method per line
-                    endpointsInHost.sort((a, b) => a.displayPath.localeCompare(b.displayPath)).forEach(ep => {
-                        html += `<span class="report-line">[${ep.method}] ${SecurityUtils.escapeForDisplay(ep.displayPath)}</span>`;
-                    });
+            toggleAllEndpointsAccordion() {
+                const content = document.getElementById('allEndpointsContent');
+                const icon = document.getElementById('allEndpointsExpandIcon');
+                
+                if (content.classList.contains('expanded')) {
+                    content.classList.remove('expanded');
+                    icon.style.transform = 'rotate(0deg)';
                 } else {
-                    // MODE: Grouped methods (e.g., [GET,POST])
-                    const pathGroup = {};
-                    endpointsInHost.forEach(ep => {
-                        if (!pathGroup[ep.displayPath]) pathGroup[ep.displayPath] = new Set();
-                        pathGroup[ep.displayPath].add(ep.method);
-                    });
-
-                    Object.keys(pathGroup).sort().forEach(path => {
-                        const methods = Array.from(pathGroup[path]).sort().join(',');
-                        html += `<span class="report-line">[${methods}] ${SecurityUtils.escapeForDisplay(path)}</span>`;
-                    });
+                    content.classList.add('expanded');
+                    icon.style.transform = 'rotate(180deg)';
                 }
+            },
 
-                html += `<br><br>`; 
-            });
-
-            html += `</div>`;
-            container.innerHTML = html;
-        }
-
-        // Export to TXT
-        function exportToTxt() {
-            if (AppState.filteredEndpoints.length === 0) {
-                alert('No endpoints to export');
-                return;
-            }
-            
-            let content = 'POSTMAN COLLECTION ANALYSIS EXPORT\n';
-            content += '='.repeat(50) + '\n\n';
-            content += `Total Unique Endpoints: ${AppState.uniqueEndpoints.length}\n`;
-            content += `Total Requests (with duplicates): ${AppState.allEndpoints.length}\n`;
-            content += `Duplicates Removed: ${AppState.duplicateCount}\n`;
-            content += `Filtered Endpoints: ${AppState.filteredEndpoints.length}\n`;
-            content += `Export Date: ${new Date().toISOString()}\n\n`;
-            content += '='.repeat(50) + '\n\n';
-            
-            // Group by host for export
-            const hostGroups = {};
-            
-            AppState.filteredEndpoints.forEach(ep => {
-                let host = "Unknown Host";
-                let displayPath = ep.normalizedUrl;
-
-                try {
-                    // Handle URLs with or without protocol - use original URL for host extraction
-                    const urlToParse = ep.originalUrl.includes('://') ? ep.originalUrl : 'http://' + ep.originalUrl;
-                    const url = new URL(urlToParse);
-                    host = `${url.protocol}//${url.host}`;
-                    
-                    // Extract path from normalized URL without URL encoding
-                    // Don't use URL constructor as it will encode { and }
-                    let normalizedPath = ep.normalizedUrl;
-                    
-                    // Remove protocol and host if present
-                    normalizedPath = normalizedPath.replace(/^https?:\/\/[^\/]+/, '');
-                    
-                    // If normalizedPath is empty or doesn't start with /, try to extract from original structure
-                    if (!normalizedPath || !normalizedPath.startsWith('/')) {
-                        normalizedPath = '/' + normalizedPath;
-                    }
-                    
-                    displayPath = normalizedPath;
-                } catch(e) {
-                    // If URL parsing fails, check if it contains variables
-                    if (ep.originalUrl.includes('{{') || ep.originalUrl.includes('{')) {
-                        host = "Unresolved/Variable Hosts";
-                    }
-                    // Extract just the path portion
-                    displayPath = ep.normalizedUrl.replace(/^https?:\/\/[^\/]+/, '') || ep.normalizedUrl;
-                }
-
-                if (!hostGroups[host]) hostGroups[host] = [];
-                hostGroups[host].push({ ...ep, displayPath });
-            });
-            
-            Object.keys(hostGroups).sort().forEach(host => {
-                content += `TARGET HOST\n`;
-                content += `-`.repeat(50) + '\n';
-                content += `${host}\n\n`;
-                content += `ENDPOINTS IN SCOPE\n`;
-                content += `-`.repeat(50) + '\n';
-                
-                const endpoints = hostGroups[host];
-                
-                if (AppState.onePerLine) {
-                    endpoints.sort((a, b) => a.displayPath.localeCompare(b.displayPath)).forEach(ep => {
-                        content += `[${ep.method}] ${ep.displayPath}\n`;
-                    });
-                } else {
-                    const pathGroup = {};
-                    endpoints.forEach(ep => {
-                        if (!pathGroup[ep.displayPath]) pathGroup[ep.displayPath] = new Set();
-                        pathGroup[ep.displayPath].add(ep.method);
-                    });
-                    
-                    Object.keys(pathGroup).sort().forEach(path => {
-                        const methods = Array.from(pathGroup[path]).sort().join(',');
-                        content += `[${methods}] ${path}\n`;
-                    });
-                }
-                
-                content += '\n\n';
-            });
-            
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `postman-analysis-${Date.now()}.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Debounce helper
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        // Event Listeners
-        document.getElementById('parseBtn').addEventListener('click', parseCollections);
-        
-        document.getElementById('collectionFiles').addEventListener('change', () => {
-            displaySelectedFiles('collectionFiles', 'collectionFilesIndicator');
-        });
-        
-        document.getElementById('environmentFiles').addEventListener('change', () => {
-            displaySelectedFiles('environmentFiles', 'environmentFilesIndicator');
-        });
-        
-        document.getElementById('clearBtn').addEventListener('click', () => {
-            document.getElementById('collectionFiles').value = '';
-            document.getElementById('environmentFiles').value = '';
-            document.getElementById('collectionFilesIndicator').innerHTML = '';
-            document.getElementById('environmentFilesIndicator').innerHTML = '';
-            document.getElementById('warningContainer').innerHTML = '';
-            document.getElementById('statsSection').classList.add('hidden');
-            document.getElementById('controlsSection').classList.add('hidden');
-            document.getElementById('allEndpointsAccordion').classList.add('hidden');
-            document.getElementById('endpointsSection').classList.add('hidden');
-            AppState.allEndpoints = [];
-            AppState.uniqueEndpoints = [];
-            AppState.filteredEndpoints = [];
-            AppState.duplicateCount = 0;
-            updateProgress(0);
-        });
-        
-        // Debounced search
-        const debouncedSearch = debounce((value) => {
-            AppState.searchTerm = value;
-            applyFiltersAndSort();
-            renderEndpoints();
-        }, SEARCH_DEBOUNCE_MS);
-        
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            debouncedSearch(e.target.value);
-        });
-        
-        document.getElementById('sortSelect').addEventListener('change', (e) => {
-            AppState.sortBy = e.target.value;
-            applyFiltersAndSort();
-            renderEndpoints();
-        });
-        
-        document.getElementById('layoutToggle').addEventListener('change', (e) => {
-            AppState.onePerLine = e.target.checked;
-            renderEndpoints();
-        });
-        
-        document.querySelectorAll('.method-filter').forEach(button => {
-            button.addEventListener('click', () => {
+            handleMethodFilter(button) {
                 const method = button.dataset.method;
                 button.classList.toggle('active');
                 
                 if (method === 'OTHER') {
                     if (button.classList.contains('active')) {
-                        AppState.activeMethodFilters.add('OPTIONS');
-                        AppState.activeMethodFilters.add('HEAD');
+                        this.activeMethodFilters.add('OPTIONS');
+                        this.activeMethodFilters.add('HEAD');
                     } else {
-                        AppState.activeMethodFilters.delete('OPTIONS');
-                        AppState.activeMethodFilters.delete('HEAD');
+                        this.activeMethodFilters.delete('OPTIONS');
+                        this.activeMethodFilters.delete('HEAD');
                     }
                 } else {
                     if (button.classList.contains('active')) {
-                        AppState.activeMethodFilters.add(method);
+                        this.activeMethodFilters.add(method);
                     } else {
-                        AppState.activeMethodFilters.delete(method);
+                        this.activeMethodFilters.delete(method);
                     }
                 }
                 
-                applyFiltersAndSort();
-                renderEndpoints();
-            });
+                this.applyFiltersAndSort();
+                this.renderEndpoints();
+            },
+
+            exportToTxt() {
+                if (this.filteredEndpoints.length === 0) {
+                    alert('No endpoints to export');
+                    return;
+                }
+                
+                let content = 'POSTMAN COLLECTION ANALYSIS EXPORT\n';
+                content += '='.repeat(50) + '\n\n';
+                content += `Total Unique Endpoints: ${this.uniqueEndpoints.length}\n`;
+                content += `Total Requests (with duplicates): ${this.allEndpoints.length}\n`;
+                content += `Duplicates Removed: ${this.duplicateCount}\n`;
+                content += `Filtered Endpoints: ${this.filteredEndpoints.length}\n`;
+                content += `Export Date: ${new Date().toISOString()}\n\n`;
+                content += '='.repeat(50) + '\n\n';
+                
+                const hostGroups = {};
+                
+                this.filteredEndpoints.forEach(ep => {
+                    let host = "Unknown Host";
+                    let displayPath = ep.normalizedUrl;
+
+                    try {
+                        const urlToParse = ep.originalUrl.includes('://') ? ep.originalUrl : 'http://' + ep.originalUrl;
+                        const url = new URL(urlToParse);
+                        host = `${url.protocol}//${url.host}`;
+                        
+                        let normalizedPath = ep.normalizedUrl;
+                        normalizedPath = normalizedPath.replace(/^https?:\/\/[^\/]+/, '');
+                        
+                        if (!normalizedPath || !normalizedPath.startsWith('/')) {
+                            normalizedPath = '/' + normalizedPath;
+                        }
+                        
+                        displayPath = normalizedPath;
+                    } catch(e) {
+                        if (ep.originalUrl.includes('{{') || ep.originalUrl.includes('{')) {
+                            host = "Unresolved/Variable Hosts";
+                        }
+                        displayPath = ep.normalizedUrl.replace(/^https?:\/\/[^\/]+/, '') || ep.normalizedUrl;
+                    }
+
+                    if (!hostGroups[host]) hostGroups[host] = [];
+                    hostGroups[host].push({ ...ep, displayPath });
+                });
+                
+                Object.keys(hostGroups).sort().forEach(host => {
+                    content += `TARGET HOST\n`;
+                    content += `-`.repeat(50) + '\n';
+                    content += `${host}\n\n`;
+                    content += `ENDPOINTS IN SCOPE\n`;
+                    content += `-`.repeat(50) + '\n';
+                    
+                    const endpoints = hostGroups[host];
+                    
+                    if (this.onePerLine) {
+                        endpoints.sort((a, b) => a.displayPath.localeCompare(b.displayPath)).forEach(ep => {
+                            content += `[${ep.method}] ${ep.displayPath}\n`;
+                        });
+                    } else {
+                        const pathGroup = {};
+                        endpoints.forEach(ep => {
+                            if (!pathGroup[ep.displayPath]) pathGroup[ep.displayPath] = new Set();
+                            pathGroup[ep.displayPath].add(ep.method);
+                        });
+                        
+                        Object.keys(pathGroup).sort().forEach(path => {
+                            const methods = Array.from(pathGroup[path]).sort().join(',');
+                            content += `[${methods}] ${path}\n`;
+                        });
+                    }
+                    
+                    content += '\n\n';
+                });
+                
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `postman-analysis-${Date.now()}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+            },
+
+            clearAll() {
+                document.getElementById('collectionFiles').value = '';
+                document.getElementById('environmentFiles').value = '';
+                document.getElementById('collectionFilesIndicator').innerHTML = '';
+                document.getElementById('environmentFilesIndicator').innerHTML = '';
+                document.getElementById('warningContainer').innerHTML = '';
+                document.getElementById('postmanUploadSection').classList.remove('collapsed');
+                document.getElementById('postmanToggleUpload').textContent = 'Collapse';
+                document.getElementById('statsSection').classList.add('hidden');
+                document.getElementById('controlsSection').classList.add('hidden');
+                document.getElementById('allEndpointsAccordion').classList.add('hidden');
+                document.getElementById('endpointsSection').classList.add('hidden');
+                this.allEndpoints = [];
+                this.uniqueEndpoints = [];
+                this.filteredEndpoints = [];
+                this.duplicateCount = 0;
+            },
+
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+        };
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            NavSystem.init();
+            NmapAnalyzer.init();
+            PostmanAnalyzer.init();
         });
-        
-        document.getElementById('exportBtn').addEventListener('click', exportToTxt);
-        
+
         // Prevent drag-and-drop XSS
         document.addEventListener('dragover', (e) => e.preventDefault());
         document.addEventListener('drop', (e) => e.preventDefault());
     </script>
 </body>
-
 </html>
